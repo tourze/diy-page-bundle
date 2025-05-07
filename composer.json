@@ -1,0 +1,20 @@
+{
+    "name": "tourze/diy-page-bundle",
+    "description": "广告位、装修",
+    "type": "symfony-bundle",
+    "require": {
+        "tourze/easy-admin-attribute": "0.1.*",
+        "tourze/doctrine-indexed-bundle": "0.0.*",
+        "tourze/doctrine-track-bundle": "0.1.*",
+        "tourze/doctrine-helper": "0.0.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "DiyPageBundle\\": "src"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "phpstan/phpstan": "^2.1"
+    }
+}
