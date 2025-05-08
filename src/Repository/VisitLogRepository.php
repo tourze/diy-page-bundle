@@ -5,7 +5,7 @@ namespace DiyPageBundle\Repository;
 use DiyPageBundle\Entity\VisitLog;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use DoctrineEnhanceBundle\Repository\CommonRepositoryAware;
+
 
 /**
  * @method VisitLog|null find($id, $lockMode = null, $lockVersion = null)
@@ -15,7 +15,6 @@ use DoctrineEnhanceBundle\Repository\CommonRepositoryAware;
  */
 class VisitLogRepository extends ServiceEntityRepository
 {
-    use CommonRepositoryAware;
 
     public function __construct(ManagerRegistry $registry)
     {

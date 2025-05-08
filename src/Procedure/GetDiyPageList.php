@@ -68,7 +68,7 @@ class GetDiyPageList extends CacheableProcedure
 
     protected function getCacheDuration(JsonRpcRequest $request): int
     {
-        return MINUTE_IN_SECONDS * 5;
+        return 60 * 5;
     }
 
     protected function getCacheTags(JsonRpcRequest $request): iterable

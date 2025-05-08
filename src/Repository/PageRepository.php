@@ -5,7 +5,7 @@ namespace DiyPageBundle\Repository;
 use DiyPageBundle\Entity\Page;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use DoctrineEnhanceBundle\Repository\CommonRepositoryAware;
+
 
 /**
  * @method Page|null find($id, $lockMode = null, $lockVersion = null)
@@ -15,7 +15,6 @@ use DoctrineEnhanceBundle\Repository\CommonRepositoryAware;
  */
 class PageRepository extends ServiceEntityRepository
 {
-    use CommonRepositoryAware;
 
     public function __construct(ManagerRegistry $registry)
     {
