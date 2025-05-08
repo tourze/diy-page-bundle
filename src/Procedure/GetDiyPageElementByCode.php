@@ -7,6 +7,7 @@ use DiyPageBundle\Entity\VisitLog;
 use DiyPageBundle\Event\BlockDataFormatEvent;
 use DiyPageBundle\Event\ElementDataFormatEvent;
 use DiyPageBundle\Repository\BlockRepository;
+use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -24,6 +25,7 @@ use Tourze\JsonRPCCacheBundle\Procedure\CacheableProcedure;
 #[MethodTag('广告位模块')]
 #[MethodDoc('传入指定的code，然后加载元素配置')]
 #[MethodExpose('GetDiyPageElementByCode')]
+#[WithMonologChannel('procedure')]
 class GetDiyPageElementByCode extends CacheableProcedure
 {
     #[MethodParam('多个code的集合')]
@@ -38,7 +40,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
         private readonly Engine $engine,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly DoctrineService $doctrineService,
-        private readonly LoggerInterface $procedureLogger,
+        private readonly LoggerInterface $logger,
         private readonly Security $security,
     ) {
     }
@@ -77,7 +79,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
                 try {
                     $checkRes = $this->engine->evaluate($block->getShowExpression(), $values);
                 } catch (\Throwable $exception) {
-                    $this->procedureLogger->error('广告位规则判断时发生异常', [
+                    $this->logger->error('广告位规则判断时发生异常', [
                         'exception' => $exception,
                         'block' => $block,
                         'expression' => $block->getShowExpression(),
@@ -87,7 +89,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
                 }
 
                 if (!$checkRes) {
-                    $this->procedureLogger->debug('广告位资格判断不通过', [
+                    $this->logger->debug('广告位资格判断不通过', [
                         'block' => $block,
                     ]);
                     continue;
@@ -122,7 +124,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
                     try {
                         $checkRes = $this->engine->evaluate($validElement->getShowExpression(), $values);
                     } catch (\Throwable $exception) {
-                        $this->procedureLogger->error('广告元素规则判断时发生异常', [
+                        $this->logger->error('广告元素规则判断时发生异常', [
                             'exception' => $exception,
                             'element' => $validElement,
                             'expression' => $validElement->getShowExpression(),
@@ -132,7 +134,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
                     }
 
                     if (!$checkRes) {
-                        $this->procedureLogger->debug('广告元素资格判断不通过', [
+                        $this->logger->debug('广告元素资格判断不通过', [
                             'element' => $validElement,
                         ]);
                         continue;
