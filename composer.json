@@ -7,7 +7,15 @@
     "tourze/doctrine-indexed-bundle": "0.0.*",
     "tourze/doctrine-track-bundle": "0.1.*",
     "tourze/doctrine-helper": "0.0.*",
-    "tourze/easy-admin-menu-bundle": "0.1.*"
+    "tourze/easy-admin-menu-bundle": "0.1.*",
+    "doctrine/doctrine-bundle": "^2.13",
+    "symfony/dependency-injection": "^6.4",
+    "symfony/config": "^6.4",
+    "symfony/http-kernel": "^6.4",
+    "doctrine/orm": "^3.0",
+    "doctrine/dbal": "^4.0",
+    "psr/log": "^3|^2|^1",
+    "tourze/enum-extra": "~0.0.5"
   },
   "autoload": {
     "psr-4": {
