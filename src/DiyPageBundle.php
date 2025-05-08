@@ -13,7 +13,6 @@ class DiyPageBundle extends Bundle implements BundleDependencyInterface
     {
         return [
             \Tourze\DoctrineIndexedBundle\DoctrineIndexedBundle::class => ['all' => true],
-            \AntdCpBundle\AntdCpBundle::class => ['all' => true],
         ];
     }
 }
