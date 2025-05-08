@@ -2,11 +2,10 @@
 
 namespace DiyPageBundle\Entity;
 
-use AppBundle\Entity\BizUser;
 use DiyPageBundle\Repository\VisitLogRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
@@ -35,7 +34,6 @@ class VisitLog
     #[ListColumn(order: 98, sorter: true)]
     #[ExportColumn]
     #[CreateTimeColumn]
-    #[Groups(['restful_read', 'admin_curd'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
     private ?\DateTimeInterface $createTime = null;
 
@@ -47,9 +45,9 @@ class VisitLog
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Element $element = null;
 
-    #[ORM\ManyToOne(targetEntity: BizUser::class)]
+    #[ORM\ManyToOne(targetEntity: UserInterface::class)]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private ?BizUser $user = null;
+    private ?UserInterface $user = null;
 
     #[ListColumn(order: 99)]
     #[CreateIpColumn]
@@ -92,12 +90,12 @@ class VisitLog
         return $this;
     }
 
-    public function getUser(): ?BizUser
+    public function getUser(): ?UserInterface
     {
         return $this->user;
     }
 
-    public function setUser(?BizUser $user): self
+    public function setUser(?UserInterface $user): self
     {
         $this->user = $user;
 
