@@ -183,7 +183,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
         return $result;
     }
 
-    protected function getCacheKey(JsonRpcRequest $request): string
+    public function getCacheKey(JsonRpcRequest $request): string
     {
         if ($this->security->getUser()) {
             return '';
@@ -192,12 +192,12 @@ class GetDiyPageElementByCode extends CacheableProcedure
         return parent::buildParamCacheKey($request->getParams());
     }
 
-    protected function getCacheDuration(JsonRpcRequest $request): int
+    public function getCacheDuration(JsonRpcRequest $request): int
     {
         return 60;
     }
 
-    protected function getCacheTags(JsonRpcRequest $request): iterable
+    public function getCacheTags(JsonRpcRequest $request): iterable
     {
         yield null;
     }
