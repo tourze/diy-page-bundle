@@ -1,6 +1,6 @@
 <?php
 
-namespace DiyPageBundle;
+namespace DiyPageBundle\Service;
 
 use DiyPageBundle\Entity\Block;
 use Knp\Menu\ItemInterface;

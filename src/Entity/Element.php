@@ -34,7 +34,6 @@ use Tourze\EasyAdmin\Attribute\Column\PictureColumn;
 use Tourze\EasyAdmin\Attribute\Field\FormField;
 use Tourze\EasyAdmin\Attribute\Field\ImagePickerField;
 use Tourze\EasyAdmin\Attribute\Field\RichTextField;
-use Tourze\EasyAdmin\Attribute\Field\SelectField;
 use Tourze\EasyAdmin\Attribute\Filter\Filterable;
 use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\EcolBundle\Attribute\Expression;
@@ -184,14 +183,6 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['comment' => '排序'])]
     private ?int $sortNumber = null;
 
-    /**
-     * 如果有配置，则只有满足指定标签条件，我们才显示这个广告
-     * 具体开发时，选项数据可以自由添加，具体做法是先一个继承了 SelectDataFetcher 的服务，然后为这个服务加一个标签 diy-page.tag.provider 就可以自动合并数据到下面去了
-     * 具体可以参考 \AiChongHuiBundle\Provider\TagProvider.
-     */
-    #[CopyColumn]
-    #[SelectField(targetEntity: 'diy-page.tag.fetcher', mode: 'multiple')]
-    #[FormField]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '显示标签'])]
     private ?array $showTags = [];
 

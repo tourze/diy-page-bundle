@@ -5,19 +5,15 @@ services:
     autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
     public: true
 
-  DiyPageBundle\:
-    resource: '../../'
-    exclude:
-      - '../../DependencyInjection/'
-      - '../../Enum/'
-      - '../../Entity/'
-      - '../../Message/'
-      - '../../Model/'
-      - '../../Exception/'
-      - '../../Resources/'
-      - '../../Tests/'
-
-  # 自动读取标签相关配置
-  diy-page.tag.fetcher:
-    class: DiyPageBundle\Service\TagFetcher
-    public: true
+  DiyPageBundle\Controller\:
+    resource: '../../Controller/'
+  DiyPageBundle\DataFixtures\:
+    resource: '../../DataFixtures/'
+  DiyPageBundle\ExpressionLanguage\:
+    resource: '../../ExpressionLanguage/'
+  DiyPageBundle\Procedure\:
+    resource: '../../Procedure/'
+  DiyPageBundle\Repository\:
+    resource: '../../Repository/'
+  DiyPageBundle\Service\:
+    resource: '../../Service/'
