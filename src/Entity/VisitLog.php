@@ -25,11 +25,6 @@ class VisitLog
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
     private ?int $id = 0;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     #[IndexColumn]
     #[ListColumn(order: 98, sorter: true)]
     #[ExportColumn]
@@ -53,6 +48,11 @@ class VisitLog
     #[CreateIpColumn]
     #[ORM\Column(length: 45, nullable: true, options: ['comment' => '创建时IP'])]
     private ?string $createdFromIp = null;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     public function setCreateTime(?\DateTimeInterface $createdAt): self
     {

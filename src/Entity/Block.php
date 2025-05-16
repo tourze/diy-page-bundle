@@ -2,7 +2,6 @@
 
 namespace DiyPageBundle\Entity;
 
-use AntdCpBundle\Builder\Field\DynamicFieldSet;
 use DiyPageBundle\Repository\BlockRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -31,7 +30,6 @@ use Tourze\EasyAdmin\Attribute\Field\FormField;
 use Tourze\EasyAdmin\Attribute\Filter\Filterable;
 use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\EcolBundle\Attribute\Expression;
-use Yiisoft\Arrays\ArraySorter;
 
 #[AsPermission(title: '广告位')]
 #[Deletable]
@@ -164,27 +162,9 @@ class Block implements \Stringable, AdminArrayInterface
     #[ORM\Column(type: Types::DATETIME_MUTABLE, length: 30, nullable: true, options: ['comment' => '结束时间'])]
     private ?\DateTimeInterface $endTime = null;
 
-    #[Ignore]
-    #[ORM\ManyToMany(targetEntity: Page::class, mappedBy: 'blocks', fetch: 'EXTRA_LAZY')]
-    private Collection $pages;
-
-    /**
-     * 有些地方也叫核心属性.
-     *
-     * @DynamicFieldSet
-     *
-     * @var Collection<BlockAttribute>
-     */
-    #[FormField(title: '关键属性')]
-    #[Groups(['restful_read'])]
-    #[ORM\OneToMany(mappedBy: 'block', targetEntity: BlockAttribute::class, cascade: ['persist'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
-    private Collection $attributes;
-
     public function __construct()
     {
         $this->elements = new ArrayCollection();
-        $this->pages = new ArrayCollection();
-        $this->attributes = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -322,25 +302,6 @@ class Block implements \Stringable, AdminArrayInterface
         return $this;
     }
 
-    /**
-     * @return array|Element[]
-     */
-    public function getValidElements(): array
-    {
-        $elements = $this->getElements()
-            ->filter(fn (Element $element) => (bool) $element->isValid())
-            ->toArray();
-        ArraySorter::multisort($elements, [
-            fn (Element $element) => $element->getSortNumber(),
-            fn (Element $element) => $element->getId(),
-        ], [
-            SORT_DESC,
-            SORT_DESC,
-        ]);
-
-        return $elements;
-    }
-
     public function getShowExpression(): ?string
     {
         return $this->showExpression;
@@ -349,33 +310,6 @@ class Block implements \Stringable, AdminArrayInterface
     public function setShowExpression(?string $showExpression): self
     {
         $this->showExpression = $showExpression;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Page>
-     */
-    public function getPages(): Collection
-    {
-        return $this->pages;
-    }
-
-    public function addPage(Page $page): self
-    {
-        if (!$this->pages->contains($page)) {
-            $this->pages->add($page);
-            $page->addBlock($this);
-        }
-
-        return $this;
-    }
-
-    public function removePage(Page $page): self
-    {
-        if ($this->pages->removeElement($page)) {
-            $page->removeBlock($this);
-        }
 
         return $this;
     }
@@ -412,36 +346,6 @@ class Block implements \Stringable, AdminArrayInterface
         $this->endTime = $endTime;
     }
 
-    /**
-     * @return Collection<int, BlockAttribute>
-     */
-    public function getAttributes(): Collection
-    {
-        return $this->attributes;
-    }
-
-    public function addAttribute(BlockAttribute $attribute): self
-    {
-        if (!$this->attributes->contains($attribute)) {
-            $this->attributes[] = $attribute;
-            $attribute->setBlock($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAttribute(BlockAttribute $attribute): self
-    {
-        if ($this->attributes->removeElement($attribute)) {
-            // set the owning side to null (unless already changed)
-            if ($attribute->getBlock() === $this) {
-                $attribute->setBlock(null);
-            }
-        }
-
-        return $this;
-    }
-
     public function retrieveAdminArray(): array
     {
         return [
@@ -456,7 +360,6 @@ class Block implements \Stringable, AdminArrayInterface
             'beginTime' => $this->getBeginTime()?->format('Y-m-d H:i:s'),
             'endTime' => $this->getEndTime()?->format('Y-m-d H:i:s'),
             'showExpression' => $this->getShowExpression(),
-            'attributes' => $this->getAttributes(),
         ];
     }
 }

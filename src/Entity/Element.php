@@ -115,7 +115,7 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     #[Ignore]
     #[ORM\ManyToOne(targetEntity: Block::class, inversedBy: 'elements')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private Block $block;
+    private ?Block $block = null;
 
     #[CopyColumn(suffix: true)]
     #[FormField]
@@ -300,7 +300,7 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
         return $this->block;
     }
 
-    public function setBlock(Block $block): self
+    public function setBlock(?Block $block): self
     {
         $this->block = $block;
 

@@ -2,7 +2,6 @@
 
 namespace DiyPageBundle\Entity;
 
-use DiyPageBundle\Repository\BlockAttributeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -31,7 +30,7 @@ use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 #[Creatable]
 #[ORM\Table(name: 'diy_page_block_attribute', options: ['comment' => '装修组件属性'])]
 #[ORM\UniqueConstraint(name: 'diy_page_block_attribute_idx_uniq', columns: ['block_id', 'name'])]
-#[ORM\Entity(repositoryClass: BlockAttributeRepository::class)]
+#[ORM\Entity]
 class BlockAttribute implements AdminArrayInterface
 {
     #[Filterable]

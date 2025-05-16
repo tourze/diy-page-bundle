@@ -3,6 +3,8 @@
 namespace DiyPageBundle\Procedure;
 
 use Carbon\Carbon;
+use DiyPageBundle\Entity\Block;
+use DiyPageBundle\Entity\Element;
 use DiyPageBundle\Entity\VisitLog;
 use DiyPageBundle\Event\BlockDataFormatEvent;
 use DiyPageBundle\Event\ElementDataFormatEvent;
@@ -21,6 +23,7 @@ use Tourze\JsonRPC\Core\Attribute\MethodTag;
 use Tourze\JsonRPC\Core\Exception\ApiException;
 use Tourze\JsonRPC\Core\Model\JsonRpcRequest;
 use Tourze\JsonRPCCacheBundle\Procedure\CacheableProcedure;
+use Yiisoft\Arrays\ArraySorter;
 
 #[MethodTag('广告位模块')]
 #[MethodDoc('传入指定的code，然后加载元素配置')]
@@ -108,7 +111,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
             }
 
             $validElements = [];
-            foreach ($block->getValidElements() as $validElement) {
+            foreach ($this->getValidElements($block) as $validElement) {
                 if ($validElement->getBeginTime() && $validElement->getEndTime()) {// 历史数据是没有配置的
                     if (Carbon::now()->lessThan($validElement->getBeginTime())) {
                         continue;
@@ -169,6 +172,25 @@ class GetDiyPageElementByCode extends CacheableProcedure
         }
 
         return $result;
+    }
+
+    /**
+     * @return array|Element[]
+     */
+    private function getValidElements(Block $block): array
+    {
+        $elements = $block->getElements()
+            ->filter(fn (Element $element) => (bool) $element->isValid())
+            ->toArray();
+        ArraySorter::multisort($elements, [
+            fn (Element $element) => $element->getSortNumber(),
+            fn (Element $element) => $element->getId(),
+        ], [
+            SORT_DESC,
+            SORT_DESC,
+        ]);
+
+        return $elements;
     }
 
     public function getCacheKey(JsonRpcRequest $request): string
