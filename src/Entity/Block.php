@@ -27,16 +27,11 @@ use Tourze\EasyAdmin\Attribute\Action\Editable;
 use Tourze\EasyAdmin\Attribute\Column\BoolColumn;
 use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
 use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Event\BeforeCreate;
-use Tourze\EasyAdmin\Attribute\Event\BeforeEdit;
 use Tourze\EasyAdmin\Attribute\Field\FormField;
 use Tourze\EasyAdmin\Attribute\Filter\Filterable;
 use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\EcolBundle\Attribute\Expression;
-use Tourze\JsonRPC\Core\Exception\ApiException;
-use Yiisoft\Arrays\ArrayHelper;
 use Yiisoft\Arrays\ArraySorter;
-use Yiisoft\Json\Json;
 
 #[AsPermission(title: '广告位')]
 #[Deletable]
@@ -346,27 +341,6 @@ class Block implements \Stringable, AdminArrayInterface
         return $elements;
     }
 
-    #[AlertConfig]
-    public function getAlterConfig()
-    {
-        $configText = $_ENV['diy_page_block_alert_config'] ?? '';
-        if ($configText) {
-            try {
-                return Json::decode($configText);
-            } catch (\Throwable $exception) {
-            }
-        }
-
-        return [
-        ];
-    }
-
-    #[ListColumn(title: '图片数量')]
-    public function getElementCount(): int
-    {
-        return count($this->getValidElements());
-    }
-
     public function getShowExpression(): ?string
     {
         return $this->showExpression;
@@ -466,29 +440,6 @@ class Block implements \Stringable, AdminArrayInterface
         }
 
         return $this;
-    }
-
-    #[BeforeCreate]
-    public function createBefore(array $form, BlockRepository $blockRepository)
-    {
-        $code = ArrayHelper::getValue($form, 'code');
-        $model = $blockRepository->findOneBy(['code' => $code]);
-        if ($model) {
-            throw new ApiException('唯一标志已存在~');
-        }
-    }
-
-    #[BeforeEdit]
-    public function editBefore(array $form, array $record, BlockRepository $blockRepository)
-    {
-        $newCode = ArrayHelper::getValue($form, 'code');
-        $oldCode = ArrayHelper::getValue($record, 'code');
-        if ($oldCode != $newCode) {
-            $model = $blockRepository->findOneBy(['code' => $newCode]);
-            if ($model) {
-                throw new ApiException('唯一标志已存在~');
-            }
-        }
     }
 
     public function retrieveAdminArray(): array
