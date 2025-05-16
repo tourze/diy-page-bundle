@@ -2,7 +2,6 @@
 
 namespace DiyPageBundle\Entity;
 
-use AntdCpBundle\Attribute\AlertConfig;
 use AntdCpBundle\Builder\Field\DynamicFieldSet;
 use DiyPageBundle\Repository\BlockRepository;
 use Doctrine\Common\Collections\ArrayCollection;
