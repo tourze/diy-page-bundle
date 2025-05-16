@@ -4,7 +4,6 @@ namespace DiyPageBundle\Procedure;
 
 use DiyPageBundle\Entity\Block;
 use DiyPageBundle\Entity\Element;
-use DiyPageBundle\Entity\Point;
 use DiyPageBundle\Repository\PageRepository;
 use Doctrine\Common\Collections\Collection;
 use Tourze\JsonRPC\Core\Attribute\MethodDoc;
@@ -65,20 +64,8 @@ class GetDiyPageElementListByPageId extends BaseProcedure
                         'appId' => $element->getAppId(),
                         'tracking' => $element->getTracking(),
                         'description' => $element->getDescription(),
-                        'points' => [],
                     ];
-                    $points = $element->getPoints();
-                    /** @var Point $point */
-                    foreach ($points as $point) {
-                        $elementData['points'][] = [
-                            'id' => $point->getId(),
-                            'thumb' => $point->getThumb(),
-                            'xAxis' => $point->getXAxis(),
-                            'yAxis' => $point->getYAxis(),
-                            'appId' => $point->getAppId(),
-                            'path' => $point->getPath(),
-                        ];
-                    }
+
                     $blockData['elements'][] = $elementData;
                 }
                 $data['blocks'][] = $blockData;

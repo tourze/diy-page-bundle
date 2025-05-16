@@ -151,18 +151,6 @@ class GetDiyPageElementByCode extends CacheableProcedure
                     continue;
                 }
 
-                $eleArray['points'] = [];
-                foreach ($validElement->getPoints() as $point) {
-                    $eleArray['points'][] = [
-                        'id' => $point->getId(),
-                        'thumb' => $point->getThumb(),
-                        'xAxis' => $point->getXAxis(),
-                        'yAxis' => $point->getYAxis(),
-                        'appId' => $point->getAppId(),
-                        'path' => $point->getPath(),
-                    ];
-                }
-
                 $validElements[] = $eleArray;
 
                 // 访问记录存到数据库

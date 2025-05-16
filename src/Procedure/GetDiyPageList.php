@@ -5,7 +5,6 @@ namespace DiyPageBundle\Procedure;
 use DiyPageBundle\Entity\Block;
 use DiyPageBundle\Entity\Element;
 use DiyPageBundle\Entity\Page;
-use DiyPageBundle\Entity\Point;
 use DiyPageBundle\Repository\PageRepository;
 use Doctrine\Common\Collections\Criteria;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -76,7 +75,6 @@ class GetDiyPageList extends CacheableProcedure
         yield CacheHelper::getClassTags(Page::class);
         yield CacheHelper::getClassTags(Block::class);
         yield CacheHelper::getClassTags(Element::class);
-        yield CacheHelper::getClassTags(Point::class);
     }
 
     private function formatItem(Page $page): array
@@ -110,21 +108,8 @@ class GetDiyPageList extends CacheableProcedure
                     'appId' => $element->getAppId(),
                     'tracking' => $element->getTracking(),
                     'description' => $element->getDescription(),
-                    'points' => [],
                 ];
-                $points = $element->getPoints();
-                /** @var Point $point */
-                foreach ($points as $point) {
-                    $elementData['points'][] = [
-                        'id' => $point->getId(),
-                        'title' => $point->getTitle(),
-                        'thumb' => $point->getThumb(),
-                        'xAxis' => $point->getXAxis(),
-                        'yAxis' => $point->getYAxis(),
-                        'appId' => $point->getAppId(),
-                        'path' => $point->getPath(),
-                    ];
-                }
+
                 $blockData['elements'][] = $elementData;
             }
             $data['blocks'][] = $blockData;

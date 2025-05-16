@@ -4,8 +4,6 @@ namespace DiyPageBundle\Entity;
 
 use AntdCpBundle\Builder\Field\BraftEditor;
 use DiyPageBundle\Repository\ElementRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -23,7 +21,6 @@ use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
 use Tourze\EasyAdmin\Attribute\Action\BatchDeletable;
 use Tourze\EasyAdmin\Attribute\Action\Creatable;
-use Tourze\EasyAdmin\Attribute\Action\CurdAction;
 use Tourze\EasyAdmin\Attribute\Action\Deletable;
 use Tourze\EasyAdmin\Attribute\Action\Editable;
 use Tourze\EasyAdmin\Attribute\Column\BoolColumn;
@@ -212,13 +209,6 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     #[ORM\Column(type: Types::DATETIME_MUTABLE, length: 30, nullable: true, options: ['comment' => '结束时间'])]
     private ?\DateTimeInterface $endTime = null;
 
-    /**
-     * @var Collection<Element>
-     */
-    #[CurdAction(label: 'point', drawerWidth: '80%')]
-    #[ORM\OneToMany(mappedBy: 'element', targetEntity: Point::class, fetch: 'EXTRA_LAZY', orphanRemoval: true)]
-    private Collection $points;
-
     #[CopyColumn]
     #[FormField]
     #[Groups(['restful_read'])]
@@ -230,11 +220,6 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     #[FormField]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '模板ID'])]
     private ?array $subscribeTemplateIds = [];
-
-    public function __construct()
-    {
-        $this->points = new ArrayCollection();
-    }
 
     public function __toString(): string
     {
@@ -306,36 +291,6 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     public function setValid(?bool $valid): self
     {
         $this->valid = $valid;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Point>
-     */
-    public function getPoints(): Collection
-    {
-        return $this->points;
-    }
-
-    public function addElement(Point $point): self
-    {
-        if (!$this->points->contains($point)) {
-            $this->points[] = $point;
-            $point->setElement($this);
-        }
-
-        return $this;
-    }
-
-    public function removeElement(Point $point): self
-    {
-        if ($this->points->removeElement($point)) {
-            // set the owning side to null (unless already changed)
-            if ($point->getElement() === $this) {
-                $point->setElement(null);
-            }
-        }
 
         return $this;
     }
