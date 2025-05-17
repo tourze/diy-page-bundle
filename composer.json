@@ -48,5 +48,10 @@
     "psr-4": {
       "DiyPageBundle\\": "src"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "DiyPageBundle\\Tests\\": "tests"
+    }
   }
 }
