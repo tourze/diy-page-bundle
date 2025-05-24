@@ -38,6 +38,7 @@
     "tourze/json-rpc-cache-bundle": "0.1.*",
     "tourze/json-rpc-core": "^0.0.6",
     "tourze/symfony-ecol-bundle": "0.1.*",
+    "tourze/symfony-schedule-entity-clean-bundle": "0.1.*",
     "yiisoft/arrays": "^3"
   },
   "require-dev": {
