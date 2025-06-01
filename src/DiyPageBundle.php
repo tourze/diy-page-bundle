@@ -13,6 +13,12 @@ class DiyPageBundle extends Bundle implements BundleDependencyInterface
     {
         return [
             \Tourze\DoctrineIndexedBundle\DoctrineIndexedBundle::class => ['all' => true],
+            \Tourze\DoctrineIpBundle\DoctrineIpBundle::class => ['all' => true],
+            \Tourze\DoctrineTimestampBundle\DoctrineTimestampBundle::class => ['all' => true],
+            \Tourze\DoctrineTrackBundle\DoctrineTrackBundle::class => ['all' => true],
+            \Tourze\DoctrineUserBundle\DoctrineUserBundle::class => ['all' => true],
+            \Tourze\DoctrineSnowflakeBundle\DoctrineSnowflakeBundle::class => ['all' => true],
+            \Tourze\EcolBundle\EcolBundle::class => ['all' => true],
         ];
     }
 }

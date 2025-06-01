@@ -2,7 +2,6 @@
 
 namespace DiyPageBundle\Entity;
 
-use AntdCpBundle\Builder\Field\BraftEditor;
 use DiyPageBundle\Repository\ElementRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -132,9 +131,6 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '副标题'])]
     private ?string $subtitle = null;
 
-    /**
-     * @BraftEditor()
-     */
     #[RichTextField]
     #[CopyColumn]
     #[FormField]
