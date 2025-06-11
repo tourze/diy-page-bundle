@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Tourze\DoctrineAsyncBundle\Service\DoctrineService;
+use Tourze\DoctrineAsyncInsertBundle\Service\AsyncInsertService;
 use Tourze\EcolBundle\Service\Engine;
 use Tourze\JsonRPC\Core\Attribute\MethodDoc;
 use Tourze\JsonRPC\Core\Attribute\MethodExpose;
@@ -42,7 +42,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
         private readonly NormalizerInterface $normalizer,
         private readonly Engine $engine,
         private readonly EventDispatcherInterface $eventDispatcher,
-        private readonly DoctrineService $doctrineService,
+        private readonly AsyncInsertService $doctrineService,
         private readonly LoggerInterface $logger,
         private readonly Security $security,
     ) {
