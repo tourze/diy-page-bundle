@@ -8,8 +8,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineTimestampBundle\Traits\CreateTimeAware;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
 use Tourze\ScheduleEntityCleanBundle\Attribute\AsScheduleClean;
 
 #[AsScheduleClean(expression: '14 2 * * *', defaultKeepDay: 7, keepDayEnv: 'DIY_PAGE_VISIT_LOG_PERSIST_DAY_NUM')]
@@ -18,8 +16,6 @@ use Tourze\ScheduleEntityCleanBundle\Attribute\AsScheduleClean;
 class VisitLog implements \Stringable
 {
     use CreateTimeAware;
-    #[ListColumn(order: -1)]
-    #[ExportColumn]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -38,7 +34,6 @@ class VisitLog implements \Stringable
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?UserInterface $user = null;
 
-    #[ListColumn(order: 99)]
     #[CreateIpColumn]
     #[ORM\Column(length: 45, nullable: true, options: ['comment' => '创建时IP'])]
     private ?string $createdFromIp = null;

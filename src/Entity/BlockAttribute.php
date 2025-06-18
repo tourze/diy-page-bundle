@@ -12,19 +12,7 @@ use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
-use Tourze\EasyAdmin\Attribute\Action\Creatable;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Action\Editable;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
-use Tourze\EasyAdmin\Attribute\Filter\Filterable;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 
-#[AsPermission(title: '关键属性')]
-#[Deletable]
-#[Editable]
-#[Creatable]
 #[ORM\Table(name: 'diy_page_block_attribute', options: ['comment' => '装修组件属性'])]
 #[ORM\UniqueConstraint(name: 'diy_page_block_attribute_idx_uniq', columns: ['block_id', 'name'])]
 #[ORM\Entity]
@@ -33,8 +21,6 @@ class BlockAttribute implements \Stringable, AdminArrayInterface
     use TimestampableAware;
     use BlameableAware;
 
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
@@ -55,19 +41,14 @@ class BlockAttribute implements \Stringable, AdminArrayInterface
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Block $block = null;
 
-    #[FormField(span: 7)]
-    #[Filterable]
-    #[ListColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 30, options: ['comment' => '属性名'])]
     private ?string $name = null;
 
-    #[FormField(span: 7)]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 64, options: ['comment' => '属性值'])]
     private ?string $value = null;
 
-    #[FormField(span: 10)]
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '备注'])]
     private ?string $remark = null;
 

@@ -17,22 +17,9 @@ use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 use Tourze\EasyAdmin\Attribute\Action\BatchDeletable;
-use Tourze\EasyAdmin\Attribute\Action\Creatable;
 use Tourze\EasyAdmin\Attribute\Action\CurdAction;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Action\Editable;
-use Tourze\EasyAdmin\Attribute\Column\BoolColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
-use Tourze\EasyAdmin\Attribute\Filter\Filterable;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\EcolBundle\Attribute\Expression;
 
-#[AsPermission(title: '广告位')]
-#[Deletable]
-#[Editable]
-#[Creatable]
 #[BatchDeletable]
 #[ORM\Entity(repositoryClass: BlockRepository::class)]
 #[ORM\Table(name: 'diy_page_block', options: ['comment' => '广告位'])]
@@ -41,8 +28,6 @@ class Block implements \Stringable, AdminArrayInterface
     use TimestampableAware;
     use BlameableAware;
 
-    #[ListColumn(order: -1)]
-    #[ExportColumn]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -62,38 +47,24 @@ class Block implements \Stringable, AdminArrayInterface
     #[ORM\Column(length: 128, nullable: true, options: ['comment' => '更新时IP'])]
     private ?string $updatedFromIp = null;
 
-    #[BoolColumn]
     #[IndexColumn]
     #[TrackColumn]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
-    #[ListColumn(order: 97)]
-    #[FormField(order: 97)]
     private ?bool $valid = false;
 
-    #[FormField]
-    #[Filterable]
-    #[ListColumn(sorter: true)]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 100, options: ['comment' => '标题'])]
     private ?string $title = null;
 
-    #[FormField(span: 12)]
-    #[Filterable]
-    #[ListColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 100, unique: true, options: ['comment' => '唯一标志'])]
     private ?string $code = null;
 
-    #[FormField(span: 12)]
-    #[Filterable]
-    #[ListColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(length: 40, nullable: true, options: ['comment' => '类型ID'])]
     private ?string $typeId = null;
 
-    #[FormField(span: 6)]
     #[Groups(['restful_read'])]
-    #[ListColumn(sorter: true)]
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['comment' => '排序'])]
     private ?int $sortNumber = null;
 
@@ -106,19 +77,14 @@ class Block implements \Stringable, AdminArrayInterface
     private Collection $elements;
 
     #[Expression]
-    #[FormField]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '显示规则'])]
     private ?string $showExpression = null;
 
     #[Groups(['admin_curd'])]
-    #[ListColumn(title: '开始时间')]
-    #[FormField(title: '开始时间', span: 8)]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, length: 30, nullable: true, options: ['comment' => '开始时间'])]
     private ?\DateTimeInterface $beginTime = null;
 
     #[Groups(['admin_curd'])]
-    #[ListColumn(title: '结束时间')]
-    #[FormField(title: '结束时间', span: 8)]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, length: 30, nullable: true, options: ['comment' => '结束时间'])]
     private ?\DateTimeInterface $endTime = null;
 

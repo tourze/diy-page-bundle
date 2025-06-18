@@ -17,25 +17,12 @@ use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 use Tourze\EasyAdmin\Attribute\Action\BatchDeletable;
-use Tourze\EasyAdmin\Attribute\Action\Creatable;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Action\Editable;
-use Tourze\EasyAdmin\Attribute\Column\BoolColumn;
 use Tourze\EasyAdmin\Attribute\Column\CopyColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
 use Tourze\EasyAdmin\Attribute\Column\PictureColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
 use Tourze\EasyAdmin\Attribute\Field\ImagePickerField;
 use Tourze\EasyAdmin\Attribute\Field\RichTextField;
-use Tourze\EasyAdmin\Attribute\Filter\Filterable;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\EcolBundle\Attribute\Expression;
 
-#[AsPermission(title: '图片')]
-#[Deletable]
-#[Editable]
-#[Creatable]
 #[BatchDeletable]
 #[ORM\Entity(repositoryClass: ElementRepository::class)]
 #[ORM\Table(name: 'diy_page_element', options: ['comment' => '图片'])]
@@ -44,8 +31,6 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     use TimestampableAware;
     use BlameableAware;
 
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
@@ -61,12 +46,9 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     #[ORM\Column(length: 128, nullable: true, options: ['comment' => '更新时IP'])]
     private ?string $updatedFromIp = null;
 
-    #[BoolColumn]
     #[IndexColumn]
     #[TrackColumn]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
-    #[ListColumn(order: 97)]
-    #[FormField(order: 97)]
     private ?bool $valid = false;
 
     #[CopyColumn]
@@ -76,23 +58,17 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     private ?Block $block = null;
 
     #[CopyColumn(suffix: true)]
-    #[FormField]
-    #[Filterable]
-    #[ListColumn(sorter: true)]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 100, options: ['comment' => '标题'])]
     private ?string $title = null;
 
     #[CopyColumn(suffix: true)]
-    #[FormField]
-    #[ListColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '副标题'])]
     private ?string $subtitle = null;
 
     #[RichTextField]
     #[CopyColumn]
-    #[FormField]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '描述'])]
     private ?string $description = null;
@@ -100,8 +76,6 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     #[ImagePickerField]
     #[PictureColumn]
     #[CopyColumn]
-    #[FormField(span: 6)]
-    #[ListColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '图片1'])]
     private ?string $thumb1 = null;
@@ -109,29 +83,21 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     #[ImagePickerField]
     #[PictureColumn]
     #[CopyColumn]
-    #[FormField(span: 18)]
-    #[ListColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '图片2'])]
     private ?string $thumb2 = null;
 
     #[CopyColumn]
-    #[FormField]
-    #[ListColumn(width: 320)]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 1000, nullable: true, options: ['comment' => '跳转的url'])]
     private ?string $path = null;
 
     #[CopyColumn]
     #[Groups(['restful_read'])]
-    #[FormField]
-    #[ListColumn]
     #[ORM\Column(length: 50, nullable: true, options: ['comment' => 'appId'])]
     private ?string $appId = null;
 
     #[CopyColumn]
-    #[FormField(span: 6)]
-    #[ListColumn(sorter: true)]
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['comment' => '排序'])]
     private ?int $sortNumber = null;
 
@@ -139,40 +105,32 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     private ?array $showTags = [];
 
     #[CopyColumn]
-    #[FormField]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 1000, nullable: true, options: ['comment' => 'Tracking'])]
     private ?string $tracking = null;
 
     #[CopyColumn]
     #[Expression]
-    #[FormField]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '显示规则'])]
     private ?string $showExpression = null;
 
     #[CopyColumn]
     #[Groups(['admin_curd'])]
-    #[ListColumn(title: '开始时间')]
-    #[FormField(title: '开始时间', span: 8)]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, length: 30, nullable: true, options: ['comment' => '开始时间'])]
     private ?\DateTimeInterface $beginTime = null;
 
     #[CopyColumn]
     #[Groups(['admin_curd'])]
-    #[ListColumn(title: '结束时间')]
-    #[FormField(title: '结束时间', span: 8)]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, length: 30, nullable: true, options: ['comment' => '结束时间'])]
     private ?\DateTimeInterface $endTime = null;
 
     #[CopyColumn]
-    #[FormField]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '登录后是否跳到path'])]
     private bool $loginJumpPage = false;
 
     #[CopyColumn]
     #[Groups(['restful_read'])]
-    #[FormField]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '模板ID'])]
     private array $subscribeTemplateIds = [];
 
