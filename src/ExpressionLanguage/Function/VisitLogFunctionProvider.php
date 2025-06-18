@@ -47,7 +47,7 @@ class VisitLogFunctionProvider implements ExpressionFunctionProviderInterface
      */
     public function getDiyPageElementTodayVisitCount(array $values, ?UserInterface $user = null, ?Element $element = null): int
     {
-        if (!$user) {
+        if ($user === null) {
             return 0;
         }
 

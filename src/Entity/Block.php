@@ -15,8 +15,7 @@ use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
+use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 use Tourze\EasyAdmin\Attribute\Action\BatchDeletable;
 use Tourze\EasyAdmin\Attribute\Action\Creatable;
 use Tourze\EasyAdmin\Attribute\Action\CurdAction;
@@ -39,6 +38,9 @@ use Tourze\EcolBundle\Attribute\Expression;
 #[ORM\Table(name: 'diy_page_block', options: ['comment' => '广告位'])]
 class Block implements \Stringable, AdminArrayInterface
 {
+    use TimestampableAware;
+    use BlameableAware;
+
     #[ListColumn(order: -1)]
     #[ExportColumn]
     #[ORM\Id]
@@ -50,15 +52,7 @@ class Block implements \Stringable, AdminArrayInterface
     {
         return $this->id;
     }
-    use TimestampableAware;
 
-    #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    #[UpdatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
-    private ?string $updatedBy = null;
 
     #[CreateIpColumn]
     #[ORM\Column(length: 128, nullable: true, options: ['comment' => '创建时IP'])]
@@ -119,13 +113,13 @@ class Block implements \Stringable, AdminArrayInterface
     #[Groups(['admin_curd'])]
     #[ListColumn(title: '开始时间')]
     #[FormField(title: '开始时间', span: 8)]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, length: 30, nullable: true, options: ['comment' => '开始时间'])]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, length: 30, nullable: true, options: ['comment' => '开始时间'])]
     private ?\DateTimeInterface $beginTime = null;
 
     #[Groups(['admin_curd'])]
     #[ListColumn(title: '结束时间')]
     #[FormField(title: '结束时间', span: 8)]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, length: 30, nullable: true, options: ['comment' => '结束时间'])]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, length: 30, nullable: true, options: ['comment' => '结束时间'])]
     private ?\DateTimeInterface $endTime = null;
 
     public function __construct()
@@ -135,7 +129,7 @@ class Block implements \Stringable, AdminArrayInterface
 
     public function __toString(): string
     {
-        if (!$this->getId()) {
+        if ($this->getId() === null) {
             return '';
         }
 

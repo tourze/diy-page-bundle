@@ -2,7 +2,6 @@
 
 namespace DiyPageBundle\Tests\Entity;
 
-use DateTime;
 use DiyPageBundle\Entity\Block;
 use DiyPageBundle\Entity\Element;
 use Doctrine\Common\Collections\Collection;
@@ -29,14 +28,14 @@ class BlockTest extends TestCase
 
     public function testGetSetCreateTime(): void
     {
-        $date = new DateTime('2023-01-01');
+        $date = new \DateTimeImmutable('2023-01-01');
         $this->block->setCreateTime($date);
         $this->assertSame($date, $this->block->getCreateTime());
     }
 
     public function testGetSetUpdateTime(): void
     {
-        $date = new DateTime('2023-01-02');
+        $date = new \DateTimeImmutable('2023-01-02');
         $this->block->setUpdateTime($date);
         $this->assertSame($date, $this->block->getUpdateTime());
     }
@@ -164,14 +163,14 @@ class BlockTest extends TestCase
 
     public function testGetSetBeginTime(): void
     {
-        $date = new DateTime('2023-01-01');
+        $date = new \DateTimeImmutable('2023-01-01');
         $this->block->setBeginTime($date);
         $this->assertSame($date, $this->block->getBeginTime());
     }
 
     public function testGetSetEndTime(): void
     {
-        $date = new DateTime('2023-01-31');
+        $date = new \DateTimeImmutable('2023-01-31');
         $this->block->setEndTime($date);
         $this->assertSame($date, $this->block->getEndTime());
     }
@@ -198,7 +197,6 @@ class BlockTest extends TestCase
         
         $adminArray = $this->block->retrieveAdminArray();
         
-        $this->assertIsArray($adminArray);
         $this->assertArrayHasKey('title', $adminArray);
         $this->assertSame('测试广告位', $adminArray['title']);
     }

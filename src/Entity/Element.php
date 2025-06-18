@@ -15,8 +15,7 @@ use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
+use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 use Tourze\EasyAdmin\Attribute\Action\BatchDeletable;
 use Tourze\EasyAdmin\Attribute\Action\Creatable;
 use Tourze\EasyAdmin\Attribute\Action\Deletable;
@@ -43,6 +42,7 @@ use Tourze\EcolBundle\Attribute\Expression;
 class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
 {
     use TimestampableAware;
+    use BlameableAware;
 
     #[ExportColumn]
     #[ListColumn(order: -1, sorter: true)]
@@ -52,13 +52,6 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
     private ?string $id = null;
 
-    #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    #[UpdatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
-    private ?string $updatedBy = null;
 
     #[CreateIpColumn]
     #[ORM\Column(length: 128, nullable: true, options: ['comment' => '创建时IP'])]
@@ -161,31 +154,31 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     #[Groups(['admin_curd'])]
     #[ListColumn(title: '开始时间')]
     #[FormField(title: '开始时间', span: 8)]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, length: 30, nullable: true, options: ['comment' => '开始时间'])]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, length: 30, nullable: true, options: ['comment' => '开始时间'])]
     private ?\DateTimeInterface $beginTime = null;
 
     #[CopyColumn]
     #[Groups(['admin_curd'])]
     #[ListColumn(title: '结束时间')]
     #[FormField(title: '结束时间', span: 8)]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, length: 30, nullable: true, options: ['comment' => '结束时间'])]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, length: 30, nullable: true, options: ['comment' => '结束时间'])]
     private ?\DateTimeInterface $endTime = null;
 
     #[CopyColumn]
     #[FormField]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '登录后是否跳到path'])]
-    private ?bool $loginJumpPage = false;
+    private bool $loginJumpPage = false;
 
     #[CopyColumn]
     #[Groups(['restful_read'])]
     #[FormField]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '模板ID'])]
-    private ?array $subscribeTemplateIds = [];
+    private array $subscribeTemplateIds = [];
 
     public function __toString(): string
     {
-        if (!$this->getId()) {
+        if ($this->getId() === null) {
             return '';
         }
 
@@ -401,12 +394,12 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
         return $this;
     }
 
-    public function getSubscribeTemplateIds(): ?array
+    public function getSubscribeTemplateIds(): array
     {
         return $this->subscribeTemplateIds;
     }
 
-    public function setSubscribeTemplateIds(?array $subscribeTemplateIds): self
+    public function setSubscribeTemplateIds(array $subscribeTemplateIds): self
     {
         $this->subscribeTemplateIds = [];
         foreach ($subscribeTemplateIds as $templateId) {

@@ -66,7 +66,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
         ];
 
         foreach ($blocks as $block) {
-            if ($block->getBeginTime() && $block->getEndTime()) {// 历史数据是没有配置的
+            if ($block->getBeginTime() !== null && $block->getEndTime() !== null) {// 历史数据是没有配置的
                 if (Carbon::now()->lessThan($block->getBeginTime())) {
                     continue;
                 }
@@ -91,7 +91,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
                     continue;
                 }
 
-                if (!$checkRes) {
+                if ($checkRes === false) {
                     $this->logger->debug('广告位资格判断不通过', [
                         'block' => $block,
                     ]);
@@ -112,7 +112,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
 
             $validElements = [];
             foreach ($this->getValidElements($block) as $validElement) {
-                if ($validElement->getBeginTime() && $validElement->getEndTime()) {// 历史数据是没有配置的
+                if ($validElement->getBeginTime() !== null && $validElement->getEndTime() !== null) {// 历史数据是没有配置的
                     if (Carbon::now()->lessThan($validElement->getBeginTime())) {
                         continue;
                     }
@@ -123,7 +123,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
                 $values['element'] = $validElement;
 
                 // 如果有配置规则的话，我们判断下是否满足规则
-                if (!empty($validElement->getShowExpression())) {
+                if ($validElement->getShowExpression() !== null && $validElement->getShowExpression() !== '') {
                     try {
                         $checkRes = $this->engine->evaluate($validElement->getShowExpression(), $values);
                     } catch (\Throwable $exception) {
@@ -136,7 +136,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
                         continue;
                     }
 
-                    if (!$checkRes) {
+                    if ($checkRes === false) {
                         $this->logger->debug('广告元素资格判断不通过', [
                             'element' => $validElement,
                         ]);
@@ -157,7 +157,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
                 $validElements[] = $eleArray;
 
                 // 访问记录存到数据库
-                if ($this->saveLog && $this->security->getUser()) {
+                if ($this->saveLog && $this->security->getUser() !== null) {
                     $visitLog = new VisitLog();
                     $visitLog->setUser($this->security->getUser());
                     $visitLog->setBlock($block);
@@ -195,7 +195,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
 
     public function getCacheKey(JsonRpcRequest $request): string
     {
-        if ($this->security->getUser()) {
+        if ($this->security->getUser() !== null) {
             return '';
         }
 

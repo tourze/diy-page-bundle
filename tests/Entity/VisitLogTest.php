@@ -2,7 +2,6 @@
 
 namespace DiyPageBundle\Tests\Entity;
 
-use DateTime;
 use DiyPageBundle\Entity\Block;
 use DiyPageBundle\Entity\Element;
 use DiyPageBundle\Entity\VisitLog;
@@ -30,9 +29,9 @@ class VisitLogTest extends TestCase
 
     public function testGetSetCreateTime(): void
     {
-        $date = new DateTime('2023-01-01');
+        $date = new \DateTimeImmutable('2023-01-01');
         $result = $this->visitLog->setCreateTime($date);
-        
+
         $this->assertSame($this->visitLog, $result);
         $this->assertSame($date, $this->visitLog->getCreateTime());
     }
@@ -41,7 +40,7 @@ class VisitLogTest extends TestCase
     {
         $block = $this->createMock(Block::class);
         $result = $this->visitLog->setBlock($block);
-        
+
         $this->assertSame($this->visitLog, $result);
         $this->assertSame($block, $this->visitLog->getBlock());
     }
@@ -50,7 +49,7 @@ class VisitLogTest extends TestCase
     {
         $element = $this->createMock(Element::class);
         $result = $this->visitLog->setElement($element);
-        
+
         $this->assertSame($this->visitLog, $result);
         $this->assertSame($element, $this->visitLog->getElement());
     }
@@ -59,7 +58,7 @@ class VisitLogTest extends TestCase
     {
         $user = $this->createMock(UserInterface::class);
         $result = $this->visitLog->setUser($user);
-        
+
         $this->assertSame($this->visitLog, $result);
         $this->assertSame($user, $this->visitLog->getUser());
     }

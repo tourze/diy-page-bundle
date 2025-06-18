@@ -15,7 +15,7 @@ class AdminMenu implements MenuProviderInterface
 
     public function __invoke(ItemInterface $item): void
     {
-        if (!$item->getChild('装修中心')) {
+        if ($item->getChild('装修中心') === null) {
             $item->addChild('装修中心');
         }
         $item->getChild('装修中心')->addChild('广告位')->setUri($this->linkGenerator->getCurdListPage(Block::class));

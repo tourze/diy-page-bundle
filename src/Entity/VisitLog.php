@@ -6,9 +6,8 @@ use DiyPageBundle\Repository\VisitLogRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
-use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
+use Tourze\DoctrineTimestampBundle\Traits\CreateTimeAware;
 use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
 use Tourze\EasyAdmin\Attribute\Column\ListColumn;
 use Tourze\ScheduleEntityCleanBundle\Attribute\AsScheduleClean;
@@ -16,8 +15,9 @@ use Tourze\ScheduleEntityCleanBundle\Attribute\AsScheduleClean;
 #[AsScheduleClean(expression: '14 2 * * *', defaultKeepDay: 7, keepDayEnv: 'DIY_PAGE_VISIT_LOG_PERSIST_DAY_NUM')]
 #[ORM\Entity(repositoryClass: VisitLogRepository::class, readOnly: true)]
 #[ORM\Table(name: 'diy_page_visit_log', options: ['comment' => '访问日志'])]
-class VisitLog
+class VisitLog implements \Stringable
 {
+    use CreateTimeAware;
     #[ListColumn(order: -1)]
     #[ExportColumn]
     #[ORM\Id]
@@ -25,12 +25,6 @@ class VisitLog
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
     private ?int $id = 0;
 
-    #[IndexColumn]
-    #[ListColumn(order: 98, sorter: true)]
-    #[ExportColumn]
-    #[CreateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
-    private ?\DateTimeInterface $createTime = null;
 
     #[ORM\ManyToOne(targetEntity: Block::class)]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -54,17 +48,6 @@ class VisitLog
         return $this->id;
     }
 
-    public function setCreateTime(?\DateTimeInterface $createdAt): self
-    {
-        $this->createTime = $createdAt;
-
-        return $this;
-    }
-
-    public function getCreateTime(): ?\DateTimeInterface
-    {
-        return $this->createTime;
-    }
 
     public function getBlock(): ?Block
     {
@@ -110,5 +93,10 @@ class VisitLog
     public function setCreatedFromIp(?string $createdFromIp): void
     {
         $this->createdFromIp = $createdFromIp;
+    }
+
+    public function __toString(): string
+    {
+        return "访问记录 #{$this->getId()} - {$this->getBlock()?->getTitle()}";
     }
 }

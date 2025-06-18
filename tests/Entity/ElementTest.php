@@ -2,7 +2,6 @@
 
 namespace DiyPageBundle\Tests\Entity;
 
-use DateTime;
 use DiyPageBundle\Entity\Block;
 use DiyPageBundle\Entity\Element;
 use PHPUnit\Framework\TestCase;
@@ -28,14 +27,14 @@ class ElementTest extends TestCase
 
     public function testGetSetCreateTime(): void
     {
-        $date = new DateTime('2023-01-01');
+        $date = new \DateTimeImmutable('2023-01-01');
         $this->element->setCreateTime($date);
         $this->assertSame($date, $this->element->getCreateTime());
     }
 
     public function testGetSetUpdateTime(): void
     {
-        $date = new DateTime('2023-01-02');
+        $date = new \DateTimeImmutable('2023-01-02');
         $this->element->setUpdateTime($date);
         $this->assertSame($date, $this->element->getUpdateTime());
     }
@@ -194,14 +193,14 @@ class ElementTest extends TestCase
 
     public function testGetSetBeginTime(): void
     {
-        $date = new DateTime('2023-01-01');
+        $date = new \DateTimeImmutable('2023-01-01');
         $this->element->setBeginTime($date);
         $this->assertSame($date, $this->element->getBeginTime());
     }
 
     public function testGetSetEndTime(): void
     {
-        $date = new DateTime('2023-01-31');
+        $date = new \DateTimeImmutable('2023-01-31');
         $this->element->setEndTime($date);
         $this->assertSame($date, $this->element->getEndTime());
     }
@@ -244,7 +243,6 @@ class ElementTest extends TestCase
         
         $apiArray = $this->element->retrieveApiArray();
         
-        $this->assertIsArray($apiArray);
         $this->assertArrayHasKey('title', $apiArray);
         $this->assertArrayHasKey('path', $apiArray);
         $this->assertArrayHasKey('thumb1', $apiArray);
@@ -259,7 +257,6 @@ class ElementTest extends TestCase
         
         $adminArray = $this->element->retrieveAdminArray();
         
-        $this->assertIsArray($adminArray);
         $this->assertArrayHasKey('title', $adminArray);
         $this->assertSame('测试元素', $adminArray['title']);
     }

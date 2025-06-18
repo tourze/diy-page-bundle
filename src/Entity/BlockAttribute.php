@@ -11,8 +11,7 @@ use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
+use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 use Tourze\EasyAdmin\Attribute\Action\Creatable;
 use Tourze\EasyAdmin\Attribute\Action\Deletable;
 use Tourze\EasyAdmin\Attribute\Action\Editable;
@@ -29,9 +28,10 @@ use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 #[ORM\Table(name: 'diy_page_block_attribute', options: ['comment' => '装修组件属性'])]
 #[ORM\UniqueConstraint(name: 'diy_page_block_attribute_idx_uniq', columns: ['block_id', 'name'])]
 #[ORM\Entity]
-class BlockAttribute implements AdminArrayInterface
+class BlockAttribute implements \Stringable, AdminArrayInterface
 {
     use TimestampableAware;
+    use BlameableAware;
 
     #[ExportColumn]
     #[ListColumn(order: -1, sorter: true)]
@@ -41,13 +41,6 @@ class BlockAttribute implements AdminArrayInterface
     #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
     private ?string $id = null;
 
-    #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    #[UpdatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
-    private ?string $updatedBy = null;
 
     #[CreateIpColumn]
     #[ORM\Column(length: 128, nullable: true, options: ['comment' => '创建时IP'])]
@@ -83,29 +76,6 @@ class BlockAttribute implements AdminArrayInterface
         return $this->id;
     }
 
-    public function setCreatedBy(?string $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
-
-    public function setUpdatedBy(?string $updatedBy): self
-    {
-        $this->updatedBy = $updatedBy;
-
-        return $this;
-    }
-
-    public function getUpdatedBy(): ?string
-    {
-        return $this->updatedBy;
-    }
 
     public function setCreatedFromIp(?string $createdFromIp): self
     {
@@ -193,5 +163,10 @@ class BlockAttribute implements AdminArrayInterface
     public function setBlock(?Block $block): void
     {
         $this->block = $block;
+    }
+
+    public function __toString(): string
+    {
+        return "{$this->getName()}: {$this->getValue()}";
     }
 }

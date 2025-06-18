@@ -12,7 +12,6 @@ class DiyPageBundleTest extends TestCase
     {
         $dependencies = DiyPageBundle::getBundleDependencies();
         
-        $this->assertIsArray($dependencies);
         $this->assertArrayHasKey(DoctrineIndexedBundle::class, $dependencies);
         $this->assertEquals(['all' => true], $dependencies[DoctrineIndexedBundle::class]);
     }
