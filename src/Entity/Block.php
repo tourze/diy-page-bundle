@@ -16,11 +16,9 @@ use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
-use Tourze\EasyAdmin\Attribute\Action\BatchDeletable;
 use Tourze\EasyAdmin\Attribute\Action\CurdAction;
 use Tourze\EcolBundle\Attribute\Expression;
 
-#[BatchDeletable]
 #[ORM\Entity(repositoryClass: BlockRepository::class)]
 #[ORM\Table(name: 'diy_page_block', options: ['comment' => '广告位'])]
 class Block implements \Stringable, AdminArrayInterface

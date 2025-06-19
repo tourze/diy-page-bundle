@@ -16,14 +16,12 @@ use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
-use Tourze\EasyAdmin\Attribute\Action\BatchDeletable;
 use Tourze\EasyAdmin\Attribute\Column\CopyColumn;
 use Tourze\EasyAdmin\Attribute\Column\PictureColumn;
 use Tourze\EasyAdmin\Attribute\Field\ImagePickerField;
 use Tourze\EasyAdmin\Attribute\Field\RichTextField;
 use Tourze\EcolBundle\Attribute\Expression;
 
-#[BatchDeletable]
 #[ORM\Entity(repositoryClass: ElementRepository::class)]
 #[ORM\Table(name: 'diy_page_element', options: ['comment' => '图片'])]
 class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
