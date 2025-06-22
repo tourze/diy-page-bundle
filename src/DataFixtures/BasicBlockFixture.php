@@ -21,7 +21,7 @@ class BasicBlockFixture extends Fixture
     {
         // 保存block
         $block = $this->blockRepository->findOneBy(['code' => 'index-banner']);
-        if (!$block) {
+        if ($block === null) {
             $block = new Block();
             $block->setValid(true);
             $block->setCode('index-banner');

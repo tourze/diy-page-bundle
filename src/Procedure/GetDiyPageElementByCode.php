@@ -2,7 +2,7 @@
 
 namespace DiyPageBundle\Procedure;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use DiyPageBundle\Entity\Block;
 use DiyPageBundle\Entity\Element;
 use DiyPageBundle\Entity\VisitLog;
@@ -67,10 +67,10 @@ class GetDiyPageElementByCode extends CacheableProcedure
 
         foreach ($blocks as $block) {
             if ($block->getBeginTime() !== null && $block->getEndTime() !== null) {// 历史数据是没有配置的
-                if (Carbon::now()->lessThan($block->getBeginTime())) {
+                if (CarbonImmutable::now()->lessThan($block->getBeginTime())) {
                     continue;
                 }
-                if (Carbon::now()->greaterThan($block->getEndTime())) {
+                if (CarbonImmutable::now()->greaterThan($block->getEndTime())) {
                     continue;
                 }
             }
@@ -113,10 +113,10 @@ class GetDiyPageElementByCode extends CacheableProcedure
             $validElements = [];
             foreach ($this->getValidElements($block) as $validElement) {
                 if ($validElement->getBeginTime() !== null && $validElement->getEndTime() !== null) {// 历史数据是没有配置的
-                    if (Carbon::now()->lessThan($validElement->getBeginTime())) {
+                    if (CarbonImmutable::now()->lessThan($validElement->getBeginTime())) {
                         continue;
                     }
-                    if (Carbon::now()->greaterThan($validElement->getEndTime())) {
+                    if (CarbonImmutable::now()->greaterThan($validElement->getEndTime())) {
                         continue;
                     }
                 }

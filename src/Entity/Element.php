@@ -16,10 +16,6 @@ use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
-use Tourze\EasyAdmin\Attribute\Column\CopyColumn;
-use Tourze\EasyAdmin\Attribute\Column\PictureColumn;
-use Tourze\EasyAdmin\Attribute\Field\ImagePickerField;
-use Tourze\EasyAdmin\Attribute\Field\RichTextField;
 use Tourze\EcolBundle\Attribute\Expression;
 
 #[ORM\Entity(repositoryClass: ElementRepository::class)]
@@ -49,85 +45,65 @@ class Element implements \Stringable, ApiArrayInterface, AdminArrayInterface
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
     private ?bool $valid = false;
 
-    #[CopyColumn]
     #[Ignore]
     #[ORM\ManyToOne(targetEntity: Block::class, inversedBy: 'elements')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Block $block = null;
 
-    #[CopyColumn(suffix: true)]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 100, options: ['comment' => '标题'])]
     private ?string $title = null;
 
-    #[CopyColumn(suffix: true)]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '副标题'])]
     private ?string $subtitle = null;
 
-    #[RichTextField]
-    #[CopyColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '描述'])]
     private ?string $description = null;
 
-    #[ImagePickerField]
-    #[PictureColumn]
-    #[CopyColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '图片1'])]
     private ?string $thumb1 = null;
 
-    #[ImagePickerField]
-    #[PictureColumn]
-    #[CopyColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '图片2'])]
     private ?string $thumb2 = null;
 
-    #[CopyColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 1000, nullable: true, options: ['comment' => '跳转的url'])]
     private ?string $path = null;
 
-    #[CopyColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(length: 50, nullable: true, options: ['comment' => 'appId'])]
     private ?string $appId = null;
 
-    #[CopyColumn]
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['comment' => '排序'])]
     private ?int $sortNumber = null;
 
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '显示标签'])]
     private ?array $showTags = [];
 
-    #[CopyColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 1000, nullable: true, options: ['comment' => 'Tracking'])]
     private ?string $tracking = null;
 
-    #[CopyColumn]
     #[Expression]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '显示规则'])]
     private ?string $showExpression = null;
 
-    #[CopyColumn]
     #[Groups(['admin_curd'])]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, length: 30, nullable: true, options: ['comment' => '开始时间'])]
     private ?\DateTimeInterface $beginTime = null;
 
-    #[CopyColumn]
     #[Groups(['admin_curd'])]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, length: 30, nullable: true, options: ['comment' => '结束时间'])]
     private ?\DateTimeInterface $endTime = null;
 
-    #[CopyColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '登录后是否跳到path'])]
     private bool $loginJumpPage = false;
 
-    #[CopyColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '模板ID'])]
     private array $subscribeTemplateIds = [];

@@ -2,7 +2,7 @@
 
 namespace DiyPageBundle\ExpressionLanguage\Function;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use DiyPageBundle\Entity\Element;
 use DiyPageBundle\Repository\VisitLogRepository;
 use Doctrine\ORM\NonUniqueResultException;
@@ -51,7 +51,7 @@ class VisitLogFunctionProvider implements ExpressionFunctionProviderInterface
             return 0;
         }
 
-        $startTime = Carbon::now()->startOfDay();
+        $startTime = CarbonImmutable::now()->startOfDay();
         $endTime = $startTime->endOfDay();
 
         $c = $this->visitLogRepository->createQueryBuilder('a')

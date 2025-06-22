@@ -16,7 +16,6 @@ use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
-use Tourze\EasyAdmin\Attribute\Action\CurdAction;
 use Tourze\EcolBundle\Attribute\Expression;
 
 #[ORM\Entity(repositoryClass: BlockRepository::class)]
@@ -70,7 +69,6 @@ class Block implements \Stringable, AdminArrayInterface
      * @var Collection<Element>
      */
     #[Ignore]
-    #[CurdAction(label: '图片管理', drawerWidth: '80%')]
     #[ORM\OneToMany(mappedBy: 'block', targetEntity: Element::class, fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     private Collection $elements;
 
@@ -93,7 +91,7 @@ class Block implements \Stringable, AdminArrayInterface
 
     public function __toString(): string
     {
-        if ($this->getId() === null) {
+        if ($this->getId() === null || $this->getTitle() === null || $this->getCode() === null) {
             return '';
         }
 
