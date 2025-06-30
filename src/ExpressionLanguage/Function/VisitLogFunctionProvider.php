@@ -16,7 +16,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 /**
  * 广告访问相关函数
  */
-#[AutoconfigureTag('ecol.function.provider')]
+#[AutoconfigureTag(name: 'ecol.function.provider')]
 class VisitLogFunctionProvider implements ExpressionFunctionProviderInterface
 {
     public function __construct(

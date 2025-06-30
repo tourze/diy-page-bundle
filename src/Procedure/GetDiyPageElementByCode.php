@@ -25,16 +25,16 @@ use Tourze\JsonRPC\Core\Model\JsonRpcRequest;
 use Tourze\JsonRPCCacheBundle\Procedure\CacheableProcedure;
 use Yiisoft\Arrays\ArraySorter;
 
-#[MethodTag('广告位模块')]
-#[MethodDoc('传入指定的code，然后加载元素配置')]
-#[MethodExpose('GetDiyPageElementByCode')]
-#[WithMonologChannel('procedure')]
+#[MethodTag(name: '广告位模块')]
+#[MethodDoc(summary: '传入指定的code，然后加载元素配置')]
+#[MethodExpose(method: 'GetDiyPageElementByCode')]
+#[WithMonologChannel(channel: 'procedure')]
 class GetDiyPageElementByCode extends CacheableProcedure
 {
-    #[MethodParam('多个code的集合')]
+    #[MethodParam(description: '多个code的集合')]
     public array $codes = [];
 
-    #[MethodParam('是否保存日志')]
+    #[MethodParam(description: '是否保存日志')]
     public bool $saveLog = true;
 
     public function __construct(
