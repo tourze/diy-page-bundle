@@ -1,17 +1,23 @@
 <?php
 
-namespace DiyPageBundle\Tests\Unit\Event;
+namespace DiyPageBundle\Tests\Event;
 
 use DiyPageBundle\Entity\Block;
 use DiyPageBundle\Event\BlockDataFormatEvent;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitSymfonyUnitTest\AbstractEventTestCase;
 
-class BlockDataFormatEventTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(BlockDataFormatEvent::class)]
+final class BlockDataFormatEventTest extends AbstractEventTestCase
 {
     private BlockDataFormatEvent $event;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->event = new BlockDataFormatEvent();
     }
 

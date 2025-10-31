@@ -2,21 +2,34 @@
 
 namespace DiyPageBundle;
 
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Tourze\BundleDependency\BundleDependencyInterface;
+use Tourze\DoctrineIndexedBundle\DoctrineIndexedBundle;
+use Tourze\DoctrineIpBundle\DoctrineIpBundle;
+use Tourze\DoctrineSnowflakeBundle\DoctrineSnowflakeBundle;
+use Tourze\DoctrineTimestampBundle\DoctrineTimestampBundle;
+use Tourze\DoctrineTrackBundle\DoctrineTrackBundle;
+use Tourze\DoctrineUserBundle\DoctrineUserBundle;
+use Tourze\EasyAdminMenuBundle\EasyAdminMenuBundle;
+use Tourze\EcolBundle\EcolBundle;
 
 class DiyPageBundle extends Bundle implements BundleDependencyInterface
 {
     public static function getBundleDependencies(): array
     {
         return [
-            \Tourze\DoctrineIndexedBundle\DoctrineIndexedBundle::class => ['all' => true],
-            \Tourze\DoctrineIpBundle\DoctrineIpBundle::class => ['all' => true],
-            \Tourze\DoctrineTimestampBundle\DoctrineTimestampBundle::class => ['all' => true],
-            \Tourze\DoctrineTrackBundle\DoctrineTrackBundle::class => ['all' => true],
-            \Tourze\DoctrineUserBundle\DoctrineUserBundle::class => ['all' => true],
-            \Tourze\DoctrineSnowflakeBundle\DoctrineSnowflakeBundle::class => ['all' => true],
-            \Tourze\EcolBundle\EcolBundle::class => ['all' => true],
+            DoctrineBundle::class => ['all' => true],
+            SecurityBundle::class => ['all' => true],
+            DoctrineIndexedBundle::class => ['all' => true],
+            DoctrineIpBundle::class => ['all' => true],
+            DoctrineTimestampBundle::class => ['all' => true],
+            DoctrineTrackBundle::class => ['all' => true],
+            DoctrineUserBundle::class => ['all' => true],
+            DoctrineSnowflakeBundle::class => ['all' => true],
+            EasyAdminMenuBundle::class => ['all' => true],
+            EcolBundle::class => ['all' => true],
         ];
     }
 }

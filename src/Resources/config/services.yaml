@@ -7,8 +7,6 @@ services:
 
   DiyPageBundle\Controller\:
     resource: '../../Controller/'
-  DiyPageBundle\DataFixtures\:
-    resource: '../../DataFixtures/'
   DiyPageBundle\ExpressionLanguage\:
     resource: '../../ExpressionLanguage/'
   DiyPageBundle\Procedure\:

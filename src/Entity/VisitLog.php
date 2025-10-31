@@ -6,7 +6,7 @@ use DiyPageBundle\Repository\VisitLogRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
+use Tourze\DoctrineIpBundle\Traits\CreatedFromIpAware;
 use Tourze\DoctrineTimestampBundle\Traits\CreateTimeAware;
 use Tourze\ScheduleEntityCleanBundle\Attribute\AsScheduleClean;
 
@@ -16,11 +16,12 @@ use Tourze\ScheduleEntityCleanBundle\Attribute\AsScheduleClean;
 class VisitLog implements \Stringable
 {
     use CreateTimeAware;
+    use CreatedFromIpAware;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
-    private ?int $id = 0;
-
+    private int $id = 0;
 
     #[ORM\ManyToOne(targetEntity: Block::class)]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -34,26 +35,19 @@ class VisitLog implements \Stringable
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?UserInterface $user = null;
 
-    #[CreateIpColumn]
-    #[ORM\Column(length: 45, nullable: true, options: ['comment' => '创建时IP'])]
-    private ?string $createdFromIp = null;
-
     public function getId(): ?int
     {
         return $this->id;
     }
-
 
     public function getBlock(): ?Block
     {
         return $this->block;
     }
 
-    public function setBlock(?Block $block): self
+    public function setBlock(?Block $block): void
     {
         $this->block = $block;
-
-        return $this;
     }
 
     public function getElement(): ?Element
@@ -61,11 +55,9 @@ class VisitLog implements \Stringable
         return $this->element;
     }
 
-    public function setElement(?Element $element): self
+    public function setElement(?Element $element): void
     {
         $this->element = $element;
-
-        return $this;
     }
 
     public function getUser(): ?UserInterface
@@ -73,21 +65,9 @@ class VisitLog implements \Stringable
         return $this->user;
     }
 
-    public function setUser(?UserInterface $user): self
+    public function setUser(?UserInterface $user): void
     {
         $this->user = $user;
-
-        return $this;
-    }
-
-    public function getCreatedFromIp(): ?string
-    {
-        return $this->createdFromIp;
-    }
-
-    public function setCreatedFromIp(?string $createdFromIp): void
-    {
-        $this->createdFromIp = $createdFromIp;
     }
 
     public function __toString(): string

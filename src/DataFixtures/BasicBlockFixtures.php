@@ -6,8 +6,11 @@ use DiyPageBundle\Entity\Block;
 use DiyPageBundle\Entity\Element;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\DependencyInjection\Attribute\When;
 
-class BasicBlockFixture extends Fixture
+#[When(env: 'test')]
+#[When(env: 'dev')]
+class BasicBlockFixtures extends Fixture
 {
     public const BLOCK_INDEX_BANNER = 'block-index-banner';
 

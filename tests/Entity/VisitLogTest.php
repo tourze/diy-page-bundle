@@ -5,68 +5,27 @@ namespace DiyPageBundle\Tests\Entity;
 use DiyPageBundle\Entity\Block;
 use DiyPageBundle\Entity\Element;
 use DiyPageBundle\Entity\VisitLog;
-use PHPUnit\Framework\TestCase;
-use Symfony\Component\Security\Core\User\UserInterface;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitDoctrineEntity\AbstractEntityTestCase;
 
-class VisitLogTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(VisitLog::class)]
+final class VisitLogTest extends AbstractEntityTestCase
 {
-    private VisitLog $visitLog;
-
-    protected function setUp(): void
+    protected function createEntity(): VisitLog
     {
-        $this->visitLog = new VisitLog();
+        return new VisitLog();
     }
 
-    public function testGetSetId(): void
+    /** @return iterable<string, array{string, mixed}> */
+    public static function propertiesProvider(): iterable
     {
-        $reflection = new \ReflectionClass(VisitLog::class);
-        $property = $reflection->getProperty('id');
-        $property->setAccessible(true);
-        $property->setValue($this->visitLog, 123);
-
-        $this->assertSame(123, $this->visitLog->getId());
+        yield 'createTime' => ['createTime', new \DateTimeImmutable('2023-01-01')];
+        yield 'block' => ['block', new Block()];
+        yield 'element' => ['element', new Element()];
+        yield 'user' => ['user', new TestUser()];
+        yield 'createdFromIp' => ['createdFromIp', '192.168.1.1'];
     }
-
-    public function testGetSetCreateTime(): void
-    {
-        $date = new \DateTimeImmutable('2023-01-01');
-        $result = $this->visitLog->setCreateTime($date);
-
-        $this->assertSame($this->visitLog, $result);
-        $this->assertSame($date, $this->visitLog->getCreateTime());
-    }
-
-    public function testGetSetBlock(): void
-    {
-        $block = $this->createMock(Block::class);
-        $result = $this->visitLog->setBlock($block);
-
-        $this->assertSame($this->visitLog, $result);
-        $this->assertSame($block, $this->visitLog->getBlock());
-    }
-
-    public function testGetSetElement(): void
-    {
-        $element = $this->createMock(Element::class);
-        $result = $this->visitLog->setElement($element);
-
-        $this->assertSame($this->visitLog, $result);
-        $this->assertSame($element, $this->visitLog->getElement());
-    }
-
-    public function testGetSetUser(): void
-    {
-        $user = $this->createMock(UserInterface::class);
-        $result = $this->visitLog->setUser($user);
-
-        $this->assertSame($this->visitLog, $result);
-        $this->assertSame($user, $this->visitLog->getUser());
-    }
-
-    public function testGetSetCreatedFromIp(): void
-    {
-        $ip = '192.168.1.1';
-        $this->visitLog->setCreatedFromIp($ip);
-        $this->assertSame($ip, $this->visitLog->getCreatedFromIp());
-    }
-} 
+}

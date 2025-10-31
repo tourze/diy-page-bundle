@@ -1,18 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DiyPageBundle\Tests;
 
 use DiyPageBundle\DiyPageBundle;
-use PHPUnit\Framework\TestCase;
-use Tourze\DoctrineIndexedBundle\DoctrineIndexedBundle;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Tourze\PHPUnitSymfonyKernelTest\AbstractBundleTestCase;
 
-class DiyPageBundleTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(DiyPageBundle::class)]
+#[RunTestsInSeparateProcesses]
+final class DiyPageBundleTest extends AbstractBundleTestCase
 {
-    public function testGetBundleDependencies(): void
-    {
-        $dependencies = DiyPageBundle::getBundleDependencies();
-        
-        $this->assertArrayHasKey(DoctrineIndexedBundle::class, $dependencies);
-        $this->assertEquals(['all' => true], $dependencies[DoctrineIndexedBundle::class]);
-    }
-} 
+}

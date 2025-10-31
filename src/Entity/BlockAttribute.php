@@ -6,14 +6,16 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
+use Symfony\Component\Validator\Constraints as Assert;
 use Tourze\Arrayable\AdminArrayInterface;
-use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
-use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
-use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
+use Tourze\DoctrineIpBundle\Traits\IpTraceableAware;
 use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
+/**
+ * @implements AdminArrayInterface<string, mixed>
+ */
 #[ORM\Table(name: 'diy_page_block_attribute', options: ['comment' => '装修组件属性'])]
 #[ORM\UniqueConstraint(name: 'diy_page_block_attribute_idx_uniq', columns: ['block_id', 'name'])]
 #[ORM\Entity]
@@ -22,15 +24,7 @@ class BlockAttribute implements \Stringable, AdminArrayInterface
     use TimestampableAware;
     use BlameableAware;
     use SnowflakeKeyAware;
-
-
-    #[CreateIpColumn]
-    #[ORM\Column(length: 128, nullable: true, options: ['comment' => '创建时IP'])]
-    private ?string $createdFromIp = null;
-
-    #[UpdateIpColumn]
-    #[ORM\Column(length: 128, nullable: true, options: ['comment' => '更新时IP'])]
-    private ?string $updatedFromIp = null;
+    use IpTraceableAware;
 
     #[Ignore]
     #[ORM\ManyToOne(targetEntity: Block::class, inversedBy: 'attributes')]
@@ -38,52 +32,29 @@ class BlockAttribute implements \Stringable, AdminArrayInterface
     private ?Block $block = null;
 
     #[Groups(groups: ['restful_read'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 30)]
     #[ORM\Column(type: Types::STRING, length: 30, options: ['comment' => '属性名'])]
     private ?string $name = null;
 
     #[Groups(groups: ['restful_read'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 64)]
     #[ORM\Column(type: Types::STRING, length: 64, options: ['comment' => '属性值'])]
     private ?string $value = null;
 
+    #[Assert\Length(max: 100)]
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '备注'])]
     private ?string $remark = null;
-
-
-
-    public function setCreatedFromIp(?string $createdFromIp): self
-    {
-        $this->createdFromIp = $createdFromIp;
-
-        return $this;
-    }
-
-    public function getCreatedFromIp(): ?string
-    {
-        return $this->createdFromIp;
-    }
-
-    public function setUpdatedFromIp(?string $updatedFromIp): self
-    {
-        $this->updatedFromIp = $updatedFromIp;
-
-        return $this;
-    }
-
-    public function getUpdatedFromIp(): ?string
-    {
-        return $this->updatedFromIp;
-    }
 
     public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(string $name): void
     {
         $this->name = $name;
-
-        return $this;
     }
 
     public function getValue(): ?string
@@ -91,11 +62,9 @@ class BlockAttribute implements \Stringable, AdminArrayInterface
         return $this->value;
     }
 
-    public function setValue(string $value): self
+    public function setValue(string $value): void
     {
         $this->value = $value;
-
-        return $this;
     }
 
     public function getRemark(): ?string
@@ -103,13 +72,14 @@ class BlockAttribute implements \Stringable, AdminArrayInterface
         return $this->remark;
     }
 
-    public function setRemark(?string $remark): self
+    public function setRemark(?string $remark): void
     {
         $this->remark = $remark;
-
-        return $this;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function retrieveApiArray(): array
     {
         return [
@@ -119,6 +89,9 @@ class BlockAttribute implements \Stringable, AdminArrayInterface
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function retrieveAdminArray(): array
     {
         return [

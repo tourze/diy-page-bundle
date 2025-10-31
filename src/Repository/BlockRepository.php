@@ -5,19 +5,32 @@ namespace DiyPageBundle\Repository;
 use DiyPageBundle\Entity\Block;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-
+use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
 
 /**
- * @method Block|null find($id, $lockMode = null, $lockVersion = null)
- * @method Block|null findOneBy(array $criteria, array $orderBy = null)
- * @method Block[]    findAll()
- * @method Block[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends ServiceEntityRepository<Block>
  */
+#[AsRepository(entityClass: Block::class)]
 class BlockRepository extends ServiceEntityRepository
 {
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Block::class);
+    }
+
+    public function save(Block $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->persist($entity);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(Block $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->remove($entity);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 }

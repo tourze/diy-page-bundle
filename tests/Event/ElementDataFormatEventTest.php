@@ -1,17 +1,23 @@
 <?php
 
-namespace DiyPageBundle\Tests\Unit\Event;
+namespace DiyPageBundle\Tests\Event;
 
 use DiyPageBundle\Entity\Element;
 use DiyPageBundle\Event\ElementDataFormatEvent;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitSymfonyUnitTest\AbstractEventTestCase;
 
-class ElementDataFormatEventTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(ElementDataFormatEvent::class)]
+final class ElementDataFormatEventTest extends AbstractEventTestCase
 {
     private ElementDataFormatEvent $event;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->event = new ElementDataFormatEvent();
     }
 

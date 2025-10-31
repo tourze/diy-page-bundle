@@ -31,6 +31,9 @@ use Yiisoft\Arrays\ArraySorter;
 #[WithMonologChannel(channel: 'procedure')]
 class GetDiyPageElementByCode extends CacheableProcedure
 {
+    /**
+     * @var array<string>
+     */
     #[MethodParam(description: '多个code的集合')]
     public array $codes = [];
 
@@ -48,9 +51,12 @@ class GetDiyPageElementByCode extends CacheableProcedure
     ) {
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function execute(): array
     {
-        if (empty($this->codes)) {
+        if (0 === count($this->codes)) {
             throw new ApiException('请输入codes');
         }
 
@@ -58,131 +64,251 @@ class GetDiyPageElementByCode extends CacheableProcedure
             'code' => $this->codes,
             'valid' => true,
         ], ['sortNumber' => 'DESC', 'id' => 'ASC']);
-        $result = [];
 
         $values = [
             'user' => $this->security->getUser(),
             'env' => $_ENV,
         ];
 
+        $result = [];
         foreach ($blocks as $block) {
-            if ($block->getBeginTime() !== null && $block->getEndTime() !== null) {// 历史数据是没有配置的
-                if (CarbonImmutable::now()->lessThan($block->getBeginTime())) {
-                    continue;
-                }
-                if (CarbonImmutable::now()->greaterThan($block->getEndTime())) {
-                    continue;
-                }
+            $blockArray = $this->processBlock($block, $values);
+            if (null !== $blockArray) {
+                $result[$block->getCode()] = $blockArray;
             }
-
-            $values['block'] = $block;
-
-            // 如果有配置规则的话，我们判断下是否满足规则
-            if (!empty($block->getShowExpression())) {
-                try {
-                    $checkRes = $this->engine->evaluate($block->getShowExpression(), $values);
-                } catch (\Throwable $exception) {
-                    $this->logger->error('广告位规则判断时发生异常', [
-                        'exception' => $exception,
-                        'block' => $block,
-                        'expression' => $block->getShowExpression(),
-                        'values' => $values,
-                    ]);
-                    continue;
-                }
-
-                if ($checkRes === false) {
-                    $this->logger->debug('广告位资格判断不通过', [
-                        'block' => $block,
-                    ]);
-                    continue;
-                }
-            }
-
-            // 格式化数据
-            $event = new BlockDataFormatEvent();
-            $event->setBlock($block);
-            $blkArray = $this->normalizer->normalize($block, 'array', ['groups' => 'restful_read']);
-            $event->setResult($blkArray);
-            $this->eventDispatcher->dispatch($event);
-            $blkArray = $event->getResult();
-            if (null === $blkArray) {
-                continue;
-            }
-
-            $validElements = [];
-            foreach ($this->getValidElements($block) as $validElement) {
-                if ($validElement->getBeginTime() !== null && $validElement->getEndTime() !== null) {// 历史数据是没有配置的
-                    if (CarbonImmutable::now()->lessThan($validElement->getBeginTime())) {
-                        continue;
-                    }
-                    if (CarbonImmutable::now()->greaterThan($validElement->getEndTime())) {
-                        continue;
-                    }
-                }
-                $values['element'] = $validElement;
-
-                // 如果有配置规则的话，我们判断下是否满足规则
-                if ($validElement->getShowExpression() !== null && $validElement->getShowExpression() !== '') {
-                    try {
-                        $checkRes = $this->engine->evaluate($validElement->getShowExpression(), $values);
-                    } catch (\Throwable $exception) {
-                        $this->logger->error('广告元素规则判断时发生异常', [
-                            'exception' => $exception,
-                            'element' => $validElement,
-                            'expression' => $validElement->getShowExpression(),
-                            'values' => $values,
-                        ]);
-                        continue;
-                    }
-
-                    if ($checkRes === false) {
-                        $this->logger->debug('广告元素资格判断不通过', [
-                            'element' => $validElement,
-                        ]);
-                        continue;
-                    }
-                }
-
-                $event = new ElementDataFormatEvent();
-                $event->setElement($validElement);
-                $eleArray = $this->normalizer->normalize($validElement, 'array', ['groups' => 'restful_read']);
-                $event->setResult($eleArray);
-                $this->eventDispatcher->dispatch($event);
-                $eleArray = $event->getResult();
-                if (null === $eleArray) {
-                    continue;
-                }
-
-                $validElements[] = $eleArray;
-
-                // 访问记录存到数据库
-                if ($this->saveLog && $this->security->getUser() !== null) {
-                    $visitLog = new VisitLog();
-                    $visitLog->setUser($this->security->getUser());
-                    $visitLog->setBlock($block);
-                    $visitLog->setElement($validElement);
-                    $this->doctrineService->asyncInsert($visitLog);
-                }
-            }
-
-            $blkArray['validElements'] = $validElements;
-
-            $result[$block->getCode()] = $blkArray;
         }
 
         return $result;
     }
 
     /**
-     * @return array|Element[]
+     * @param array<string, mixed> $values
+     * @return array<string, mixed>|null
+     */
+    private function processBlock(Block $block, array $values): ?array
+    {
+        if (!$this->isBlockTimeValid($block)) {
+            return null;
+        }
+
+        $values['block'] = $block;
+
+        if (!$this->evaluateBlockExpression($block, $values)) {
+            return null;
+        }
+
+        $blockArray = $this->formatBlockData($block);
+        if (null === $blockArray) {
+            return null;
+        }
+
+        $validElements = $this->processElements($block, $values);
+        $blockArray['validElements'] = $validElements;
+
+        return $blockArray;
+    }
+
+    private function isBlockTimeValid(Block $block): bool
+    {
+        if (null === $block->getBeginTime() || null === $block->getEndTime()) {
+            return true;
+        }
+
+        $now = CarbonImmutable::now();
+
+        return !$now->lessThan($block->getBeginTime()) && !$now->greaterThan($block->getEndTime());
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function evaluateBlockExpression(Block $block, array $values): bool
+    {
+        if (null === $block->getShowExpression() || '' === $block->getShowExpression()) {
+            return true;
+        }
+
+        try {
+            $checkRes = $this->engine->evaluate($block->getShowExpression(), $values);
+        } catch (\Throwable $exception) {
+            $this->logger->error('广告位规则判断时发生异常', [
+                'exception' => $exception,
+                'block' => $block,
+                'expression' => $block->getShowExpression(),
+                'values' => $values,
+            ]);
+
+            return false;
+        }
+
+        if (false === $checkRes) {
+            $this->logger->debug('广告位资格判断不通过', [
+                'block' => $block,
+            ]);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function formatBlockData(Block $block): ?array
+    {
+        $event = new BlockDataFormatEvent();
+        $event->setBlock($block);
+        $blkArray = $this->normalizer->normalize($block, 'array', ['groups' => 'restful_read']);
+        if (is_array($blkArray)) {
+            /** @var array<string, mixed> $blkArray */
+            $event->setResult($blkArray);
+        }
+        $this->eventDispatcher->dispatch($event);
+
+        return $event->getResult();
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     * @return array<mixed>
+     */
+    private function processElements(Block $block, array $values): array
+    {
+        $validElements = [];
+        foreach ($this->getValidElements($block) as $validElement) {
+            $elementArray = $this->processElement($validElement, $block, $values);
+            if (null !== $elementArray) {
+                $validElements[] = $elementArray;
+            }
+        }
+
+        return $validElements;
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     * @return array<string, mixed>|null
+     */
+    private function processElement(Element $element, Block $block, array $values): ?array
+    {
+        if (!$this->isElementTimeValid($element)) {
+            return null;
+        }
+
+        $values['element'] = $element;
+
+        if (!$this->evaluateElementExpression($element, $values)) {
+            return null;
+        }
+
+        $elementArray = $this->formatElementData($element);
+        if (null === $elementArray) {
+            return null;
+        }
+
+        $this->saveVisitLog($block, $element);
+
+        return $elementArray;
+    }
+
+    private function isElementTimeValid(Element $element): bool
+    {
+        if (null === $element->getBeginTime() || null === $element->getEndTime()) {
+            return true;
+        }
+
+        $now = CarbonImmutable::now();
+
+        return !$now->lessThan($element->getBeginTime()) && !$now->greaterThan($element->getEndTime());
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function evaluateElementExpression(Element $element, array $values): bool
+    {
+        if (null === $element->getShowExpression() || '' === $element->getShowExpression()) {
+            return true;
+        }
+
+        try {
+            $checkRes = $this->engine->evaluate($element->getShowExpression(), $values);
+        } catch (\Throwable $exception) {
+            $this->logger->error('广告元素规则判断时发生异常', [
+                'exception' => $exception,
+                'element' => $element,
+                'expression' => $element->getShowExpression(),
+                'values' => $values,
+            ]);
+
+            return false;
+        }
+
+        if (false === $checkRes) {
+            $this->logger->debug('广告元素资格判断不通过', [
+                'element' => $element,
+            ]);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function formatElementData(Element $element): ?array
+    {
+        $event = new ElementDataFormatEvent();
+        $event->setElement($element);
+        $eleArray = $this->normalizer->normalize($element, 'array', ['groups' => 'restful_read']);
+        if (is_array($eleArray)) {
+            /** @var array<string, mixed> $eleArray */
+            $event->setResult($eleArray);
+        }
+        $this->eventDispatcher->dispatch($event);
+
+        $result = $event->getResult();
+        if (null === $result) {
+            return null;
+        }
+        $result['elementId'] = $element->getId();
+
+        return $result;
+    }
+
+    private function saveVisitLog(Block $block, Element $element): void
+    {
+        if (!$this->saveLog || null === $this->security->getUser()) {
+            return;
+        }
+
+        $visitLog = new VisitLog();
+        $visitLog->setUser($this->security->getUser());
+        $visitLog->setBlock($block);
+        $visitLog->setElement($element);
+        $this->doctrineService->asyncInsert($visitLog);
+    }
+
+    /**
+     * @return array<Element>
      */
     private function getValidElements(Block $block): array
     {
-        $elements = $block->getElements()
-            ->filter(fn (Element $element) => (bool) $element->isValid())
-            ->toArray();
-        ArraySorter::multisort($elements, [
+        $allElements = $block->getElements();
+
+        /** @var array<Element> $validElements */
+        $validElements = [];
+
+        foreach ($allElements as $element) {
+            if ($element instanceof Element && true === $element->isValid()) {
+                $validElements[] = $element;
+            }
+        }
+
+        ArraySorter::multisort($validElements, [
             fn (Element $element) => $element->getSortNumber(),
             fn (Element $element) => $element->getId(),
         ], [
@@ -190,16 +316,22 @@ class GetDiyPageElementByCode extends CacheableProcedure
             SORT_DESC,
         ]);
 
-        return $elements;
+        /** @var array<Element> $validElements */
+        return $validElements;
     }
 
     public function getCacheKey(JsonRpcRequest $request): string
     {
-        if ($this->security->getUser() !== null) {
+        if (null !== $this->security->getUser()) {
             return '';
         }
 
-        return parent::buildParamCacheKey($request->getParams());
+        $params = $request->getParams();
+        if (null === $params) {
+            return '';
+        }
+
+        return parent::buildParamCacheKey($params);
     }
 
     public function getCacheDuration(JsonRpcRequest $request): int
@@ -207,8 +339,11 @@ class GetDiyPageElementByCode extends CacheableProcedure
         return 60;
     }
 
+    /**
+     * @return iterable<string>
+     */
     public function getCacheTags(JsonRpcRequest $request): iterable
     {
-        yield null;
+        return [];
     }
 }

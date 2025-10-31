@@ -2,82 +2,84 @@
 
 namespace DiyPageBundle\Tests\Service;
 
-use DiyPageBundle\Entity\Block;
 use DiyPageBundle\Service\AdminMenu;
-use Knp\Menu\ItemInterface;
-use PHPUnit\Framework\TestCase;
+use Knp\Menu\MenuFactory;
+use Knp\Menu\MenuItem;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Tourze\EasyAdminMenuBundle\Service\LinkGeneratorInterface;
+use Tourze\PHPUnitSymfonyWebTest\AbstractEasyAdminMenuTestCase;
 
-class AdminMenuTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(AdminMenu::class)]
+#[RunTestsInSeparateProcesses]
+final class AdminMenuTest extends AbstractEasyAdminMenuTestCase
 {
-    private AdminMenu $adminMenu;
-    private LinkGeneratorInterface $linkGenerator;
+    protected function onSetUp(): void
+    {
+        $linkGenerator = $this->createMock(LinkGeneratorInterface::class);
+        $linkGenerator->method('getCurdListPage')->willReturn('/admin/list');
 
-    protected function setUp(): void
-    {
-        $this->linkGenerator = $this->createMock(LinkGeneratorInterface::class);
-        $this->adminMenu = new AdminMenu($this->linkGenerator);
+        self::getContainer()->set(LinkGeneratorInterface::class, $linkGenerator);
     }
 
-    public function testInvoke_withNoExistingChild(): void
+    public function testMenuCreation(): void
     {
-        // 创建对象
-        $childItem = $this->createMock(ItemInterface::class);
-        $childItem->expects($this->once())
-            ->method('setUri')
-            ->willReturnSelf();
-        
-        $decorationCenterItem = $this->createMock(ItemInterface::class);
-        $decorationCenterItem->expects($this->once())
-            ->method('addChild')
-            ->with('广告位')
-            ->willReturn($childItem);
-            
-        $item = $this->createMock(ItemInterface::class);
-        $item->method('getChild')
-            ->with('装修中心')
-            ->willReturnOnConsecutiveCalls(null, $decorationCenterItem);
-        $item->expects($this->once())
-            ->method('addChild')
-            ->with('装修中心')
-            ->willReturn($decorationCenterItem);
-            
-        $this->linkGenerator->expects($this->once())
-            ->method('getCurdListPage')
-            ->with(Block::class)
-            ->willReturn('/admin/block/list');
-            
-        // 执行测试
-        ($this->adminMenu)($item);
+        $adminMenu = self::getService(AdminMenu::class);
+
+        // 使用真实的 MenuFactory 而不是 mock
+        $factory = new MenuFactory();
+        $rootItem = new MenuItem('root', $factory);
+
+        $adminMenu($rootItem);
+
+        $this->assertGreaterThan(0, count($rootItem->getChildren()), 'Root item should have at least one child');
+
+        $decorationCenter = $rootItem->getChild('装修中心');
+        $this->assertNotNull($decorationCenter, '装修中心 menu should exist');
+        $this->assertGreaterThan(0, count($decorationCenter->getChildren()), 'Decoration center menu should have children');
+
+        // 验证所有子菜单项都存在
+        $this->assertNotNull($decorationCenter->getChild('广告位管理'));
+        $this->assertNotNull($decorationCenter->getChild('图片元素管理'));
+        $this->assertNotNull($decorationCenter->getChild('元素属性管理'));
+        $this->assertNotNull($decorationCenter->getChild('组件属性管理'));
+        $this->assertNotNull($decorationCenter->getChild('访问日志'));
     }
-    
-    public function testInvoke_withExistingChild(): void
+
+    public function testMenuIcons(): void
     {
-        // 创建对象
-        $childItem = $this->createMock(ItemInterface::class);
-        $childItem->expects($this->once())
-            ->method('setUri')
-            ->willReturnSelf();
-        
-        $decorationCenterItem = $this->createMock(ItemInterface::class);
-        $decorationCenterItem->expects($this->once())
-            ->method('addChild')
-            ->with('广告位')
-            ->willReturn($childItem);
-            
-        $item = $this->createMock(ItemInterface::class);
-        $item->method('getChild')
-            ->with('装修中心')
-            ->willReturn($decorationCenterItem);
-        $item->expects($this->never())
-            ->method('addChild');
-            
-        $this->linkGenerator->expects($this->once())
-            ->method('getCurdListPage')
-            ->with(Block::class)
-            ->willReturn('/admin/block/list');
-            
-        // 执行测试
-        ($this->adminMenu)($item);
+        $adminMenu = self::getService(AdminMenu::class);
+
+        $factory = new MenuFactory();
+        $rootItem = new MenuItem('root', $factory);
+
+        $adminMenu($rootItem);
+
+        $decorationCenter = $rootItem->getChild('装修中心');
+        $this->assertNotNull($decorationCenter);
+
+        // 验证图标设置
+        $blockMenu = $decorationCenter->getChild('广告位管理');
+        $this->assertNotNull($blockMenu);
+        $this->assertEquals('fas fa-th-large', $blockMenu->getAttribute('icon'));
+
+        $elementMenu = $decorationCenter->getChild('图片元素管理');
+        $this->assertNotNull($elementMenu);
+        $this->assertEquals('fas fa-images', $elementMenu->getAttribute('icon'));
+
+        $elementAttributeMenu = $decorationCenter->getChild('元素属性管理');
+        $this->assertNotNull($elementAttributeMenu);
+        $this->assertEquals('fas fa-tags', $elementAttributeMenu->getAttribute('icon'));
+
+        $blockAttributeMenu = $decorationCenter->getChild('组件属性管理');
+        $this->assertNotNull($blockAttributeMenu);
+        $this->assertEquals('fas fa-cogs', $blockAttributeMenu->getAttribute('icon'));
+
+        $visitLogMenu = $decorationCenter->getChild('访问日志');
+        $this->assertNotNull($visitLogMenu);
+        $this->assertEquals('fas fa-chart-line', $visitLogMenu->getAttribute('icon'));
     }
-} 
+}

@@ -1,0 +1,8 @@
+services:
+    _defaults:
+        autoconfigure: true
+        autowire: true
+
+    DiyPageBundle\DataFixtures\:
+        resource: '../../DataFixtures'
+        tags: ['doctrine.fixture.orm']
