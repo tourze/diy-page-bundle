@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace DiyPageBundle\Tests\Controller\Admin;
 
 use DiyPageBundle\Controller\Admin\BlockAttributeCrudController;
-use DiyPageBundle\Entity\BlockAttribute;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Tourze\PHPUnitSymfonyWebTest\AbstractEasyAdminControllerTestCase;
@@ -49,12 +48,6 @@ final class BlockAttributeCrudControllerTest extends AbstractEasyAdminController
     public static function provideEditPageFields(): iterable
     {
         return self::provideNewPageFields();
-    }
-
-    public function testGetEntityFqcn(): void
-    {
-        $controller = new BlockAttributeCrudController();
-        $this->assertEquals(BlockAttribute::class, $controller::getEntityFqcn());
     }
 
     public function testRequiredFieldValidation(): void

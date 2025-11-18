@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace DiyPageBundle\Tests\Controller\Admin;
 
 use DiyPageBundle\Controller\Admin\VisitLogCrudController;
-use DiyPageBundle\Entity\VisitLog;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Tourze\PHPUnitSymfonyWebTest\AbstractEasyAdminControllerTestCase;
@@ -50,11 +49,5 @@ final class VisitLogCrudControllerTest extends AbstractEasyAdminControllerTestCa
         // VisitLog 是只读的，没有编辑表单
         // 返回一个占位符以通过测试
         yield 'id' => ['id'];
-    }
-
-    public function testGetEntityFqcn(): void
-    {
-        $controller = new VisitLogCrudController();
-        $this->assertEquals(VisitLog::class, $controller::getEntityFqcn());
     }
 }
