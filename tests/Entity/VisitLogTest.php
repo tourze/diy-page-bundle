@@ -7,6 +7,7 @@ use DiyPageBundle\Entity\Element;
 use DiyPageBundle\Entity\VisitLog;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tourze\PHPUnitDoctrineEntity\AbstractEntityTestCase;
+use Tourze\UserIDBundle\Model\SystemUser;
 
 /**
  * @internal
@@ -25,7 +26,7 @@ final class VisitLogTest extends AbstractEntityTestCase
         yield 'createTime' => ['createTime', new \DateTimeImmutable('2023-01-01')];
         yield 'block' => ['block', new Block()];
         yield 'element' => ['element', new Element()];
-        yield 'user' => ['user', new TestUser()];
+        yield 'user' => ['user', new SystemUser()];
         yield 'createdFromIp' => ['createdFromIp', '192.168.1.1'];
     }
 }

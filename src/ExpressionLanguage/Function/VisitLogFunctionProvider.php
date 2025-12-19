@@ -9,6 +9,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
@@ -17,9 +18,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 /**
  * 广告访问相关函数
  */
+#[Autoconfigure(public: true)]
 #[AutoconfigureTag(name: 'ecol.function.provider')]
 #[WithMonologChannel(channel: 'diy_page')]
-class VisitLogFunctionProvider implements ExpressionFunctionProviderInterface
+readonly class VisitLogFunctionProvider implements ExpressionFunctionProviderInterface
 {
     public function __construct(
         private readonly LoggerInterface $logger,

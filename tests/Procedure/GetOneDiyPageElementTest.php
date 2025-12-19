@@ -2,11 +2,12 @@
 
 namespace DiyPageBundle\Tests\Procedure;
 
+use DiyPageBundle\Param\GetOneDiyPageElementParam;
 use DiyPageBundle\Procedure\GetOneDiyPageElement;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Tourze\JsonRPC\Core\Exception\ApiException;
-use Tourze\JsonRPC\Core\Tests\AbstractProcedureTestCase;
+use Tourze\PHPUnitJsonRPC\AbstractProcedureTestCase;
 
 /**
  * @internal
@@ -29,14 +30,7 @@ final class GetOneDiyPageElementTest extends AbstractProcedureTestCase
         $this->expectException(ApiException::class);
         $this->expectExceptionMessage('元素不存在');
 
-        $this->procedure->elementId = 999999; // 设置一个不存在的ID
-        $this->procedure->execute();
-    }
-
-    public function testElementIdProperty(): void
-    {
-        $elementId = 123;
-        $this->procedure->elementId = $elementId;
-        $this->assertSame($elementId, $this->procedure->elementId);
+        $param = new GetOneDiyPageElementParam(elementId: 999999); // 设置一个不存在的ID
+        $this->procedure->execute($param);
     }
 }

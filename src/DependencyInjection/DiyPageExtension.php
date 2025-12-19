@@ -4,7 +4,7 @@ namespace DiyPageBundle\DependencyInjection;
 
 use Tourze\SymfonyDependencyServiceLoader\AutoExtension;
 
-class DiyPageExtension extends AutoExtension
+final class DiyPageExtension extends AutoExtension
 {
     protected function getConfigDir(): string
     {

@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace DiyPageBundle\Tests\Procedure;
 
 use DiyPageBundle\Entity\Block;
+use DiyPageBundle\Param\GetBlockListParam;
 use DiyPageBundle\Procedure\GetBlockList;
 use DiyPageBundle\Repository\BlockRepository;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\QueryBuilder;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
-use PHPUnit\Framework\MockObject\MockObject;
-use Tourze\JsonRPC\Core\Tests\AbstractProcedureTestCase;
+use Tourze\JsonRPC\Core\Result\ArrayResult;
+use Tourze\PHPUnitJsonRPC\AbstractProcedureTestCase;
 
 /**
  * @internal
@@ -21,273 +20,136 @@ use Tourze\JsonRPC\Core\Tests\AbstractProcedureTestCase;
 #[RunTestsInSeparateProcesses]
 final class GetBlockListTest extends AbstractProcedureTestCase
 {
-    private BlockRepository&MockObject $blockRepository;
-
+    private BlockRepository $repository;
     private GetBlockList $procedure;
 
     protected function onSetUp(): void
     {
-        $container = self::getContainer();
+        // 清理数据库
+        self::cleanDatabase();
 
-        $this->blockRepository = $this->createMock(BlockRepository::class);
-        $container->set(BlockRepository::class, $this->blockRepository);
+        $this->repository = self::getService(BlockRepository::class);
+        $this->procedure = self::getService(GetBlockList::class);
 
-        $procedure = $container->get(GetBlockList::class);
-        $this->assertInstanceOf(GetBlockList::class, $procedure);
-        $this->procedure = $procedure;
+        // 创建测试数据
+        $this->createTestData();
+    }
+
+    private function createTestData(): void
+    {
+        $manager = self::getEntityManager();
+
+        $uniqid = uniqid();
+
+        // 创建示例广告位
+        $sampleBlock = new Block();
+        $sampleBlock->setValid(true);
+        $sampleBlock->setCode('sample-block-' . $uniqid);
+        $sampleBlock->setTitle('示例广告位');
+        $sampleBlock->setSortNumber(1);
+        $manager->persist($sampleBlock);
+
+        // 创建无效的广告位
+        $invalidBlock = new Block();
+        $invalidBlock->setValid(false);
+        $invalidBlock->setCode('invalid-block-' . $uniqid);
+        $invalidBlock->setTitle('无效广告位');
+        $invalidBlock->setSortNumber(2);
+        $manager->persist($invalidBlock);
+
+        // 创建第二个有效的广告位
+        $validBlock2 = new Block();
+        $validBlock2->setValid(true);
+        $validBlock2->setCode('valid-block-2-' . $uniqid);
+        $validBlock2->setTitle('有效广告位2');
+        $validBlock2->setSortNumber(3);
+        $manager->persist($validBlock2);
+
+        $manager->flush();
     }
 
     public function testExecuteWithDefaults(): void
     {
-        $queryBuilder = $this->createMock(QueryBuilder::class);
-        $countQueryBuilder = $this->createMock(QueryBuilder::class);
-        $query = $this->createMock(Query::class);
-        $countQuery = $this->createMock(Query::class);
+        $param = new GetBlockListParam();
+        $result = $this->procedure->execute($param);
 
-        $block1 = $this->createBlock(1, 'Block 1', 'block1', true);
-        $block2 = $this->createBlock(2, 'Block 2', 'block2', false);
+        $this->assertInstanceOf(ArrayResult::class, $result);
 
-        $this->blockRepository->expects($this->exactly(2))
-            ->method('createQueryBuilder')
-            ->with('b')
-            ->willReturnOnConsecutiveCalls($queryBuilder, $countQueryBuilder)
-        ;
+        // ArrayResult 使用公共属性 data
+        $this->assertIsArray($result->data);
+        $resultArray = $result->data;
+        $this->assertArrayHasKey('items', $resultArray);
+        $this->assertArrayHasKey('total', $resultArray);
+        $this->assertArrayHasKey('page', $resultArray);
+        $this->assertArrayHasKey('limit', $resultArray);
+        $this->assertArrayHasKey('pages', $resultArray);
 
-        $queryBuilder->expects($this->once())
-            ->method('orderBy')
-            ->with('b.sortNumber', 'ASC')
-            ->willReturnSelf()
-        ;
+        // 应该返回所有的广告位（包括有效的和无效的）
+        $this->assertGreaterThanOrEqual(3, $resultArray['total']);
+        $this->assertEquals(1, $resultArray['page']);
+        $this->assertEquals(20, $resultArray['limit']);
+        $this->assertGreaterThanOrEqual(1, $resultArray['pages']);
 
-        $queryBuilder->expects($this->once())
-            ->method('addOrderBy')
-            ->with('b.id', 'DESC')
-            ->willReturnSelf()
-        ;
-
-        $queryBuilder->expects($this->once())
-            ->method('setFirstResult')
-            ->with(0)
-            ->willReturnSelf()
-        ;
-
-        $queryBuilder->expects($this->once())
-            ->method('setMaxResults')
-            ->with(20)
-            ->willReturnSelf()
-        ;
-
-        $queryBuilder->expects($this->once())
-            ->method('getQuery')
-            ->willReturn($query)
-        ;
-
-        $query->expects($this->once())
-            ->method('getResult')
-            ->willReturn([$block1, $block2])
-        ;
-
-        $countQueryBuilder->expects($this->once())
-            ->method('select')
-            ->with('COUNT(b.id)')
-            ->willReturnSelf()
-        ;
-
-        $countQueryBuilder->expects($this->once())
-            ->method('getQuery')
-            ->willReturn($countQuery)
-        ;
-
-        $countQuery->expects($this->once())
-            ->method('getSingleScalarResult')
-            ->willReturn('2')
-        ;
-
-        $result = $this->procedure->execute();
-
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('items', $result);
-        $this->assertArrayHasKey('total', $result);
-        $this->assertArrayHasKey('page', $result);
-        $this->assertArrayHasKey('limit', $result);
-        $this->assertArrayHasKey('pages', $result);
-
-        $this->assertCount(2, $result['items']);
-        $this->assertEquals(2, $result['total']);
-        $this->assertEquals(1, $result['page']);
-        $this->assertEquals(20, $result['limit']);
-        $this->assertEquals(1, $result['pages']);
+        // 验证返回的数据结构
+        $items = $resultArray['items'];
+        $this->assertIsArray($items);
+        if (count($items) > 0) {
+            $firstItem = $items[0];
+            $this->assertArrayHasKey('id', $firstItem);
+            $this->assertArrayHasKey('title', $firstItem);
+            $this->assertArrayHasKey('code', $firstItem);
+            $this->assertArrayHasKey('valid', $firstItem);
+        }
     }
 
     public function testExecuteWithValidOnlyFilter(): void
     {
-        $this->procedure->validOnly = true;
+        $param = new GetBlockListParam(validOnly: true);
+        $result = $this->procedure->execute($param);
 
-        $queryBuilder = $this->createMock(QueryBuilder::class);
-        $countQueryBuilder = $this->createMock(QueryBuilder::class);
-        $query = $this->createMock(Query::class);
-        $countQuery = $this->createMock(Query::class);
+        $this->assertInstanceOf(ArrayResult::class, $result);
 
-        $block1 = $this->createBlock(1, 'Valid Block', 'valid-block', true);
+        // ArrayResult 使用公共属性 data
+        $this->assertIsArray($result->data);
+        $resultArray = $result->data;
+        $this->assertArrayHasKey('items', $resultArray);
+        $this->assertArrayHasKey('total', $resultArray);
 
-        $this->blockRepository->expects($this->exactly(2))
-            ->method('createQueryBuilder')
-            ->with('b')
-            ->willReturnOnConsecutiveCalls($queryBuilder, $countQueryBuilder)
-        ;
+        // 应该只返回有效的广告位
+        $this->assertGreaterThanOrEqual(2, $resultArray['total']);
+        $this->assertCount($resultArray['total'], $resultArray['items']);
 
-        $queryBuilder->expects($this->once())
-            ->method('andWhere')
-            ->with('b.valid = :valid')
-            ->willReturnSelf()
-        ;
-
-        $queryBuilder->expects($this->once())
-            ->method('setParameter')
-            ->with('valid', true)
-            ->willReturnSelf()
-        ;
-
-        $queryBuilder->expects($this->once())
-            ->method('orderBy')
-            ->with('b.sortNumber', 'ASC')
-            ->willReturnSelf()
-        ;
-
-        $queryBuilder->expects($this->once())
-            ->method('addOrderBy')
-            ->with('b.id', 'DESC')
-            ->willReturnSelf()
-        ;
-
-        $queryBuilder->expects($this->once())
-            ->method('setFirstResult')
-            ->with(0)
-            ->willReturnSelf()
-        ;
-
-        $queryBuilder->expects($this->once())
-            ->method('setMaxResults')
-            ->with(20)
-            ->willReturnSelf()
-        ;
-
-        $queryBuilder->expects($this->once())
-            ->method('getQuery')
-            ->willReturn($query)
-        ;
-
-        $query->expects($this->once())
-            ->method('getResult')
-            ->willReturn([$block1])
-        ;
-
-        $countQueryBuilder->expects($this->once())
-            ->method('andWhere')
-            ->with('b.valid = :valid')
-            ->willReturnSelf()
-        ;
-
-        $countQueryBuilder->expects($this->once())
-            ->method('setParameter')
-            ->with('valid', true)
-            ->willReturnSelf()
-        ;
-
-        $countQueryBuilder->expects($this->once())
-            ->method('select')
-            ->with('COUNT(b.id)')
-            ->willReturnSelf()
-        ;
-
-        $countQueryBuilder->expects($this->once())
-            ->method('getQuery')
-            ->willReturn($countQuery)
-        ;
-
-        $countQuery->expects($this->once())
-            ->method('getSingleScalarResult')
-            ->willReturn('1')
-        ;
-
-        $result = $this->procedure->execute();
-
-        $this->assertEquals(1, $result['total']);
-        $this->assertCount(1, $result['items']);
+        // 验证所有返回的广告位都是有效的
+        foreach ($resultArray['items'] as $item) {
+            $this->assertArrayHasKey('valid', $item);
+            $this->assertTrue($item['valid']);
+        }
     }
 
     public function testExecuteWithPagination(): void
     {
-        $this->procedure->page = 2;
-        $this->procedure->limit = 10;
+        $param = new GetBlockListParam(page: 2, limit: 1);
+        $result = $this->procedure->execute($param);
 
-        $queryBuilder = $this->createMock(QueryBuilder::class);
-        $countQueryBuilder = $this->createMock(QueryBuilder::class);
-        $query = $this->createMock(Query::class);
-        $countQuery = $this->createMock(Query::class);
+        $this->assertInstanceOf(ArrayResult::class, $result);
 
-        $this->blockRepository->expects($this->exactly(2))
-            ->method('createQueryBuilder')
-            ->with('b')
-            ->willReturnOnConsecutiveCalls($queryBuilder, $countQueryBuilder)
-        ;
+        // ArrayResult 使用公共属性 data
+        $this->assertIsArray($result->data);
+        $resultArray = $result->data;
+        $this->assertArrayHasKey('items', $resultArray);
+        $this->assertArrayHasKey('total', $resultArray);
+        $this->assertArrayHasKey('page', $resultArray);
+        $this->assertArrayHasKey('limit', $resultArray);
+        $this->assertArrayHasKey('pages', $resultArray);
 
-        $queryBuilder->expects($this->once())
-            ->method('orderBy')
-            ->with('b.sortNumber', 'ASC')
-            ->willReturnSelf()
-        ;
+        $this->assertEquals(2, $resultArray['page']);
+        $this->assertEquals(1, $resultArray['limit']);
+        $this->assertGreaterThanOrEqual(3, $resultArray['total']); // 至少有3条数据
+        $this->assertGreaterThanOrEqual(3, $resultArray['pages']); // 至少有3页
 
-        $queryBuilder->expects($this->once())
-            ->method('addOrderBy')
-            ->with('b.id', 'DESC')
-            ->willReturnSelf()
-        ;
-
-        $queryBuilder->expects($this->once())
-            ->method('setFirstResult')
-            ->with(10)
-            ->willReturnSelf()
-        ;
-
-        $queryBuilder->expects($this->once())
-            ->method('setMaxResults')
-            ->with(10)
-            ->willReturnSelf()
-        ;
-
-        $queryBuilder->expects($this->once())
-            ->method('getQuery')
-            ->willReturn($query)
-        ;
-
-        $query->expects($this->once())
-            ->method('getResult')
-            ->willReturn([])
-        ;
-
-        $countQueryBuilder->expects($this->once())
-            ->method('select')
-            ->with('COUNT(b.id)')
-            ->willReturnSelf()
-        ;
-
-        $countQueryBuilder->expects($this->once())
-            ->method('getQuery')
-            ->willReturn($countQuery)
-        ;
-
-        $countQuery->expects($this->once())
-            ->method('getSingleScalarResult')
-            ->willReturn('25')
-        ;
-
-        $result = $this->procedure->execute();
-
-        $this->assertEquals(25, $result['total']);
-        $this->assertEquals(2, $result['page']);
-        $this->assertEquals(10, $result['limit']);
-        $this->assertEquals(3, $result['pages']);
+        // 验证分页逻辑
+        $expectedPages = (int) ceil($resultArray['total'] / $resultArray['limit']);
+        $this->assertEquals($expectedPages, $resultArray['pages']);
     }
 
     public function testProcedureAttributes(): void
@@ -327,18 +189,5 @@ final class GetBlockListTest extends AbstractProcedureTestCase
 
         $tagArgs = $methodTag->getArguments();
         $this->assertEquals('广告位模块', $tagArgs['name']);
-    }
-
-    private function createBlock(int $id, string $title, string $code, bool $valid): Block
-    {
-        $block = $this->createMock(Block::class);
-        $block->method('retrieveAdminArray')->willReturn([
-            'id' => $id,
-            'title' => $title,
-            'code' => $code,
-            'valid' => $valid,
-        ]);
-
-        return $block;
     }
 }

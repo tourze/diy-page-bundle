@@ -5,7 +5,7 @@ namespace DiyPageBundle\Event;
 use DiyPageBundle\Entity\Block;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class BlockDataFormatEvent extends Event
+final class BlockDataFormatEvent extends Event
 {
     private Block $block;
 

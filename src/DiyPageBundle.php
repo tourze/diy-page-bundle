@@ -14,6 +14,7 @@ use Tourze\DoctrineTrackBundle\DoctrineTrackBundle;
 use Tourze\DoctrineUserBundle\DoctrineUserBundle;
 use Tourze\EasyAdminMenuBundle\EasyAdminMenuBundle;
 use Tourze\EcolBundle\EcolBundle;
+use Tourze\FileStorageBundle\FileStorageBundle;
 
 class DiyPageBundle extends Bundle implements BundleDependencyInterface
 {
@@ -30,6 +31,7 @@ class DiyPageBundle extends Bundle implements BundleDependencyInterface
             DoctrineSnowflakeBundle::class => ['all' => true],
             EasyAdminMenuBundle::class => ['all' => true],
             EcolBundle::class => ['all' => true],
+            FileStorageBundle::class => ['all' => true],
         ];
     }
 }

@@ -8,18 +8,19 @@ use DiyPageBundle\Entity\Element;
 use DiyPageBundle\Entity\VisitLog;
 use DiyPageBundle\Event\BlockDataFormatEvent;
 use DiyPageBundle\Event\ElementDataFormatEvent;
+use DiyPageBundle\Param\GetDiyPageElementByCodeParam;
 use DiyPageBundle\Repository\BlockRepository;
 use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Tourze\DoctrineAsyncInsertBundle\Service\AsyncInsertService as DoctrineService;
 use Tourze\EcolBundle\Service\Engine;
 use Tourze\JsonRPC\Core\Attribute\MethodDoc;
 use Tourze\JsonRPC\Core\Attribute\MethodExpose;
-use Tourze\JsonRPC\Core\Attribute\MethodParam;
 use Tourze\JsonRPC\Core\Attribute\MethodTag;
+use Tourze\JsonRPC\Core\Contracts\RpcParamInterface;
+use Tourze\JsonRPC\Core\Result\ArrayResult;
 use Tourze\JsonRPC\Core\Exception\ApiException;
 use Tourze\JsonRPC\Core\Model\JsonRpcRequest;
 use Tourze\JsonRPCCacheBundle\Procedure\CacheableProcedure;
@@ -29,20 +30,10 @@ use Yiisoft\Arrays\ArraySorter;
 #[MethodDoc(summary: '传入指定的code，然后加载元素配置')]
 #[MethodExpose(method: 'GetDiyPageElementByCode')]
 #[WithMonologChannel(channel: 'procedure')]
-class GetDiyPageElementByCode extends CacheableProcedure
+final class GetDiyPageElementByCode extends CacheableProcedure
 {
-    /**
-     * @var array<string>
-     */
-    #[MethodParam(description: '多个code的集合')]
-    public array $codes = [];
-
-    #[MethodParam(description: '是否保存日志')]
-    public bool $saveLog = true;
-
     public function __construct(
         private readonly BlockRepository $blockRepository,
-        private readonly NormalizerInterface $normalizer,
         private readonly Engine $engine,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly DoctrineService $doctrineService,
@@ -52,16 +43,16 @@ class GetDiyPageElementByCode extends CacheableProcedure
     }
 
     /**
-     * @return array<string, mixed>
+     * @phpstan-param GetDiyPageElementByCodeParam $param
      */
-    public function execute(): array
+    public function execute(GetDiyPageElementByCodeParam|RpcParamInterface $param): ArrayResult
     {
-        if (0 === count($this->codes)) {
+        if (0 === count($param->codes)) {
             throw new ApiException('请输入codes');
         }
 
         $blocks = $this->blockRepository->findBy([
-            'code' => $this->codes,
+            'code' => $param->codes,
             'valid' => true,
         ], ['sortNumber' => 'DESC', 'id' => 'ASC']);
 
@@ -72,20 +63,20 @@ class GetDiyPageElementByCode extends CacheableProcedure
 
         $result = [];
         foreach ($blocks as $block) {
-            $blockArray = $this->processBlock($block, $values);
+            $blockArray = $this->processBlock($block, $values, $param);
             if (null !== $blockArray) {
                 $result[$block->getCode()] = $blockArray;
             }
         }
 
-        return $result;
+        return new ArrayResult($result);
     }
 
     /**
      * @param array<string, mixed> $values
      * @return array<string, mixed>|null
      */
-    private function processBlock(Block $block, array $values): ?array
+    private function processBlock(Block $block, array $values, GetDiyPageElementByCodeParam $param): ?array
     {
         if (!$this->isBlockTimeValid($block)) {
             return null;
@@ -102,7 +93,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
             return null;
         }
 
-        $validElements = $this->processElements($block, $values);
+        $validElements = $this->processElements($block, $values, $param);
         $blockArray['validElements'] = $validElements;
 
         return $blockArray;
@@ -159,11 +150,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
     {
         $event = new BlockDataFormatEvent();
         $event->setBlock($block);
-        $blkArray = $this->normalizer->normalize($block, 'array', ['groups' => 'restful_read']);
-        if (is_array($blkArray)) {
-            /** @var array<string, mixed> $blkArray */
-            $event->setResult($blkArray);
-        }
+        $event->setResult($block->retrieveApiArray());
         $this->eventDispatcher->dispatch($event);
 
         return $event->getResult();
@@ -173,11 +160,11 @@ class GetDiyPageElementByCode extends CacheableProcedure
      * @param array<string, mixed> $values
      * @return array<mixed>
      */
-    private function processElements(Block $block, array $values): array
+    private function processElements(Block $block, array $values, GetDiyPageElementByCodeParam $param): array
     {
         $validElements = [];
         foreach ($this->getValidElements($block) as $validElement) {
-            $elementArray = $this->processElement($validElement, $block, $values);
+            $elementArray = $this->processElement($validElement, $block, $values, $param);
             if (null !== $elementArray) {
                 $validElements[] = $elementArray;
             }
@@ -190,7 +177,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
      * @param array<string, mixed> $values
      * @return array<string, mixed>|null
      */
-    private function processElement(Element $element, Block $block, array $values): ?array
+    private function processElement(Element $element, Block $block, array $values, GetDiyPageElementByCodeParam $param): ?array
     {
         if (!$this->isElementTimeValid($element)) {
             return null;
@@ -207,7 +194,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
             return null;
         }
 
-        $this->saveVisitLog($block, $element);
+        $this->saveVisitLog($block, $element, $param);
 
         return $elementArray;
     }
@@ -263,11 +250,7 @@ class GetDiyPageElementByCode extends CacheableProcedure
     {
         $event = new ElementDataFormatEvent();
         $event->setElement($element);
-        $eleArray = $this->normalizer->normalize($element, 'array', ['groups' => 'restful_read']);
-        if (is_array($eleArray)) {
-            /** @var array<string, mixed> $eleArray */
-            $event->setResult($eleArray);
-        }
+        $event->setResult($element->retrieveApiArray());
         $this->eventDispatcher->dispatch($event);
 
         $result = $event->getResult();
@@ -279,9 +262,9 @@ class GetDiyPageElementByCode extends CacheableProcedure
         return $result;
     }
 
-    private function saveVisitLog(Block $block, Element $element): void
+    private function saveVisitLog(Block $block, Element $element, GetDiyPageElementByCodeParam $param): void
     {
-        if (!$this->saveLog || null === $this->security->getUser()) {
+        if (!$param->saveLog || null === $this->security->getUser()) {
             return;
         }
 

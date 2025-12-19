@@ -3,15 +3,18 @@ services:
   _defaults:
     autowire: true      # Automatically injects dependencies in your services.
     autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
-    public: true
+    public: false
 
   DiyPageBundle\Controller\:
     resource: '../../Controller/'
-  DiyPageBundle\ExpressionLanguage\:
-    resource: '../../ExpressionLanguage/'
-  DiyPageBundle\Procedure\:
-    resource: '../../Procedure/'
   DiyPageBundle\Repository\:
     resource: '../../Repository/'
   DiyPageBundle\Service\:
     resource: '../../Service/'
+    public: true
+  DiyPageBundle\Procedure\:
+    resource: '../../Procedure/'
+    public: true
+  DiyPageBundle\ExpressionLanguage\:
+    resource: '../../ExpressionLanguage/'
+    public: true

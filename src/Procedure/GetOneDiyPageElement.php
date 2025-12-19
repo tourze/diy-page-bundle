@@ -3,34 +3,33 @@
 namespace DiyPageBundle\Procedure;
 
 use DiyPageBundle\Entity\Element;
+use DiyPageBundle\Param\GetOneDiyPageElementParam;
 use DiyPageBundle\Repository\ElementRepository;
 use Tourze\JsonRPC\Core\Attribute\MethodDoc;
 use Tourze\JsonRPC\Core\Attribute\MethodExpose;
-use Tourze\JsonRPC\Core\Attribute\MethodParam;
 use Tourze\JsonRPC\Core\Attribute\MethodTag;
+use Tourze\JsonRPC\Core\Contracts\RpcParamInterface;
+use Tourze\JsonRPC\Core\Result\ArrayResult;
 use Tourze\JsonRPC\Core\Exception\ApiException;
 use Tourze\JsonRPC\Core\Procedure\BaseProcedure;
 
 #[MethodTag(name: '广告位模块')]
 #[MethodDoc(summary: '获取某个配置的具体信息')]
 #[MethodExpose(method: 'GetOneDiyPageElement')]
-class GetOneDiyPageElement extends BaseProcedure
+final class GetOneDiyPageElement extends BaseProcedure
 {
-    #[MethodParam(description: '需要查询的元素ID')]
-    public int $elementId;
-
     public function __construct(
         private readonly ElementRepository $elementRepository,
     ) {
     }
 
     /**
-     * @return array<string, mixed>
+     * @phpstan-param GetOneDiyPageElementParam $param
      */
-    public function execute(): array
+    public function execute(GetOneDiyPageElementParam|RpcParamInterface $param): ArrayResult
     {
         // 查找元素
-        $element = $this->elementRepository->find($this->elementId);
+        $element = $this->elementRepository->find($param->elementId);
 
         if (!$element instanceof Element) {
             throw new ApiException('元素不存在', 404);

@@ -2,11 +2,12 @@
 
 namespace DiyPageBundle\Tests\Procedure;
 
+use DiyPageBundle\Param\GetDiyPageElementByCodeParam;
 use DiyPageBundle\Procedure\GetDiyPageElementByCode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Tourze\JsonRPC\Core\Exception\ApiException;
-use Tourze\JsonRPC\Core\Tests\AbstractProcedureTestCase;
+use Tourze\PHPUnitJsonRPC\AbstractProcedureTestCase;
 
 /**
  * @internal
@@ -29,21 +30,7 @@ final class GetDiyPageElementByCodeTest extends AbstractProcedureTestCase
         $this->expectException(ApiException::class);
         $this->expectExceptionMessage('请输入codes');
 
-        $this->procedure->codes = [];
-        $this->procedure->execute();
-    }
-
-    public function testSaveLogProperty(): void
-    {
-        $this->assertTrue($this->procedure->saveLog);
-        $this->procedure->saveLog = false;
-        $this->assertFalse($this->procedure->saveLog);
-    }
-
-    public function testCodesProperty(): void
-    {
-        $codes = ['test1', 'test2'];
-        $this->procedure->codes = $codes;
-        $this->assertSame($codes, $this->procedure->codes);
+        $param = new GetDiyPageElementByCodeParam(codes: []);
+        $this->procedure->execute($param);
     }
 }

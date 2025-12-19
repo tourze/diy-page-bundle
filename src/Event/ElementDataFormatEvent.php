@@ -8,7 +8,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  * 元素格式化事件
  */
-class ElementDataFormatEvent extends Event
+final class ElementDataFormatEvent extends Event
 {
     /**
      * @var array<string, mixed>|null
